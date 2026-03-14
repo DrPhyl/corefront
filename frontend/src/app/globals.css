@@ -68,7 +68,7 @@
 .dot-grid {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 20%, transparent 100%);
   pointer-events: none;
@@ -97,7 +97,7 @@
 }
 
 .bg-glow-green {
-  background: radial-gradient(ellipse 800px 400px at 50% 40%, var(--accent-glow), transparent);
+  background: radial-gradient(ellipse 600px 300px at 50% 40%, rgba(0, 220, 130, 0.06), transparent);
 }
 
 /* ===== CARD STYLES ===== */

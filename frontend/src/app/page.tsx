@@ -119,7 +119,7 @@ export default function LandingPage() {
       </nav>
 
       {/* HERO */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16 bg-[#0a0a0a]">
         <div className="dot-grid dot-grid-animated" />
         <div className="absolute inset-0 bg-glow-green pointer-events-none" />
 
