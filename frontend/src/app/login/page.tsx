@@ -26,39 +26,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] p-4">
-      {/* Animated background */}
-      <div className="gradient-mesh" />
-
-      <div className="w-full max-w-md relative z-10">
+    <div className="min-h-screen flex items-center justify-center bg-[#000] p-4">
+      <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold text-white">Corefront</span>
+            <span className="text-[#00dc82] text-2xl glow-green-text">⬡</span>
+            <span className="text-[#ededed] font-semibold text-lg">corefront</span>
           </Link>
         </div>
 
         {/* Card */}
-        <div className="glass-card p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Welcome back</h1>
-            <p className="text-gray-400">Sign in to your Corefront account</p>
+        <div className="bg-[#0a0a0a] rounded-xl p-8">
+          <div className="text-center mb-6">
+            <h1 className="text-[#ededed] text-xl font-semibold mb-1">Welcome back</h1>
+            <p className="text-[#444] text-sm">Sign in to your account</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+              <div className="p-3 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg text-[#ef4444] text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-[#888] text-sm mb-2">
                 Email
               </label>
               <input
@@ -68,12 +61,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
+                className="input"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-[#888] text-sm mb-2">
                 Password
               </label>
               <input
@@ -83,20 +76,20 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all"
+                className="input"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-outline-green w-full py-3 disabled:opacity-50"
             >
               {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-[#00dc82] border-t-transparent rounded-full animate-spin" />
                   Signing in...
-                </>
+                </div>
               ) : (
                 "Sign in"
               )}
@@ -104,20 +97,13 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-[#444] text-sm">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors">
+              <Link href="/register" className="text-[#00dc82] hover:underline">
                 Sign up
               </Link>
             </p>
           </div>
-        </div>
-
-        {/* Social login hint */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-500 text-xs">
-            By signing in, you agree to our Terms of Service and Privacy Policy
-          </p>
         </div>
       </div>
     </div>
