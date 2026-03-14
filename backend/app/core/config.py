@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://redis:6379/0"
 
+    # CORS
+    CORS_ORIGINS: str = "http://localhost:3000,https://corefront.ai"
+
 
 @lru_cache()
 def get_settings() -> Settings:
