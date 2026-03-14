@@ -55,13 +55,14 @@ export default function DashboardPage() {
     return date.toLocaleDateString();
   };
 
-  const getFrameworkBadge = (framework: string) => {
-    const badges: Record<string, string> = {
-      react: "⚛️",
-      vue: "💚",
-      svelte: "🔥",
+  const getFrameworkStyle = (framework: string) => {
+    const styles: Record<string, { text: string; color: string }> = {
+      react: { text: "React", color: "text-cyan-400" },
+      vue: { text: "Vue", color: "text-emerald-400" },
+      svelte: { text: "Svelte", color: "text-orange-400" },
+      nextjs: { text: "Next.js", color: "text-white" },
     };
-    return badges[framework] || "📦";
+    return styles[framework] || { text: framework, color: "text-gray-400" };
   };
 
   const filteredProjects = projects.filter((p) =>
@@ -70,7 +71,7 @@ export default function DashboardPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#000]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0d0d0d]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-6 h-6 border-2 border-[#00dc82] border-t-transparent rounded-full animate-spin" />
           <span className="text-[#444] text-sm">Loading...</span>
@@ -84,34 +85,29 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#000] flex">
-      {/* Sidebar - 64px, pure black, icons only */}
-      <aside className="w-16 bg-[#000] border-r border-[#222] flex flex-col items-center py-4">
+    <div className="min-h-screen bg-[#0d0d0d] flex">
+      {/* Sidebar - 64px, icons only */}
+      <aside className="w-16 bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col items-center py-4">
         {/* Logo */}
         <Link href="/" className="text-[#00dc82] text-xl mb-8">⬡</Link>
 
         {/* Nav icons */}
         <nav className="flex-1 flex flex-col items-center gap-2">
-          <button className="w-10 h-10 rounded-lg bg-[#111] flex items-center justify-center relative group">
+          <button className="w-10 h-10 rounded-lg bg-[#161616] flex items-center justify-center relative group">
             <svg className="w-5 h-5 text-[#ededed]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             <span className="absolute left-1 top-1 w-1.5 h-1.5 rounded-full bg-[#00dc82]" />
           </button>
-          <button className="w-10 h-10 rounded-lg hover:bg-[#111] flex items-center justify-center transition-colors group">
+          <button className="w-10 h-10 rounded-lg hover:bg-[#161616] flex items-center justify-center transition-colors group">
             <svg className="w-5 h-5 text-[#444] group-hover:text-[#888]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
             </svg>
           </button>
-          <button className="w-10 h-10 rounded-lg hover:bg-[#111] flex items-center justify-center transition-colors group">
+          <button className="w-10 h-10 rounded-lg hover:bg-[#161616] flex items-center justify-center transition-colors group">
             <svg className="w-5 h-5 text-[#444] group-hover:text-[#888]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-          <button className="w-10 h-10 rounded-lg hover:bg-[#111] flex items-center justify-center transition-colors group">
-            <svg className="w-5 h-5 text-[#444] group-hover:text-[#888]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </button>
         </nav>
@@ -126,13 +122,13 @@ export default function DashboardPage() {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 bg-[#0a0a0a]">
+      <div className="flex-1">
         {/* Top bar */}
-        <header className="h-14 border-b border-[#222] flex items-center justify-between px-6">
+        <header className="h-14 border-b border-[#1a1a1a] flex items-center justify-between px-6 bg-[#0a0a0a]">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-[#444]">⬡</span>
-            <span className="text-[#444]">/</span>
-            <span className="text-[#ededed]">Projects</span>
+            <span className="text-[#00dc82]">⬡</span>
+            <span className="text-[#333]">/</span>
+            <span className="text-[#ededed]">Dashboard</span>
           </div>
 
           {/* Search */}
@@ -146,96 +142,109 @@ export default function DashboardPage() {
                 placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-[#111] border border-[#222] rounded-lg text-[#ededed] placeholder-[#444] text-sm focus:outline-none focus:border-[#333] transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-[#161616] border border-[#222] rounded-lg text-[#ededed] placeholder-[#444] text-sm focus:outline-none focus:border-[#333] transition-colors"
               />
             </div>
           </div>
 
-          {/* New project button */}
-          <Link href="/builder/new" className="btn btn-primary text-sm py-2">
-            New project
-          </Link>
+          {/* User info */}
+          <span className="text-[#666] text-sm">{user.email}</span>
         </header>
 
         {/* Content */}
-        <main className="p-6">
-          {/* New project hero card */}
-          <div className="border-dashed-green p-8 mb-8 bg-[#000] rounded-xl">
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-[#ededed] text-lg font-medium mb-2">Start a new project</h2>
-              <p className="text-[#444] text-sm mb-6">Describe what you want to build</p>
+        <main className="p-8 max-w-6xl mx-auto">
+          {/* Hero prompt section - FIRST thing users see */}
+          <div className="text-center mb-12 pt-8">
+            <h1 className="text-[#ededed] text-3xl font-semibold mb-3">
+              What do you want to build today?
+            </h1>
+            <p className="text-[#666] text-base mb-8">
+              Describe your app and let AI generate the code
+            </p>
+            <div className="max-w-2xl mx-auto">
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Build a dashboard with user authentication..."
+                  placeholder="A SaaS dashboard with authentication and billing..."
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleCreateProject()}
-                  className="w-full px-5 py-4 bg-[#111] border border-[#333] rounded-xl text-[#ededed] placeholder-[#444] focus:outline-none focus:border-[#00dc82] focus:shadow-[0_0_20px_rgba(0,220,130,0.1)] transition-all"
+                  className="w-full px-6 py-4 bg-[#111] border border-[#222] rounded-2xl text-[#ededed] placeholder-[#444] text-base focus:outline-none focus:border-[#00dc82] focus:shadow-[0_0_30px_rgba(0,220,130,0.1)] transition-all pr-28"
                 />
                 <button
                   onClick={handleCreateProject}
                   disabled={!prompt.trim()}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary py-2.5 px-5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Generate →
+                  Build →
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Projects header */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[#888] text-sm">Your projects</h3>
-            <span className="text-[#444] text-sm">{projects.length} total</span>
+          {/* Projects section header */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[#ededed] text-lg font-medium">Your projects</h2>
+            <Link href="/builder/new" className="btn btn-secondary text-sm py-2 px-4">
+              + New project
+            </Link>
           </div>
 
           {/* Projects grid */}
           {filteredProjects.length === 0 ? (
-            <div className="card p-12 text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#111] flex items-center justify-center">
-                <svg className="w-6 h-6 text-[#444]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-[#111] border border-[#1a1a1a] rounded-xl p-16 text-center">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#161616] flex items-center justify-center">
+                <svg className="w-8 h-8 text-[#333]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <h3 className="text-[#ededed] font-medium mb-2">No projects yet</h3>
-              <p className="text-[#444] text-sm">Start building something amazing.</p>
+              <h3 className="text-[#ededed] font-medium text-lg mb-2">No projects yet</h3>
+              <p className="text-[#666] text-sm mb-6">Create your first project to get started</p>
+              <Link href="/builder/new" className="btn btn-primary py-2.5 px-6">
+                Create project
+              </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProjects.map((project) => (
-                <button
-                  key={project.id}
-                  onClick={() => router.push(`/builder/${project.id}`)}
-                  className="card p-5 text-left card-glow group"
-                >
-                  {/* Framework badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl">{getFrameworkBadge(project.framework)}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded ${
-                      project.status === "completed"
-                        ? "bg-[#00dc82]/10 text-[#00dc82]"
-                        : project.status === "failed"
-                          ? "bg-[#ef4444]/10 text-[#ef4444]"
-                          : "bg-[#f5a623]/10 text-[#f5a623]"
-                    }`}>
-                      {project.status}
-                    </span>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredProjects.map((project) => {
+                const fw = getFrameworkStyle(project.framework);
+                return (
+                  <div
+                    key={project.id}
+                    onClick={() => router.push(`/builder/${project.id}`)}
+                    className="bg-[#111] border border-[#1a1a1a] rounded-xl overflow-hidden cursor-pointer transition-all hover:border-[#00dc82]/50 hover:shadow-[0_0_30px_rgba(0,220,130,0.08)] group"
+                  >
+                    {/* Thumbnail area */}
+                    <div className="h-32 bg-[#0a0a0a] flex items-center justify-center relative">
+                      <span className={`text-sm font-medium ${fw.color}`}>{fw.text}</span>
+                      {/* 3-dot menu */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Menu logic here
+                        }}
+                        className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-[#444] hover:text-[#888] hover:bg-[#1a1a1a] opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="12" cy="6" r="1.5" />
+                          <circle cx="12" cy="12" r="1.5" />
+                          <circle cx="12" cy="18" r="1.5" />
+                        </svg>
+                      </button>
+                    </div>
 
-                  {/* Project info */}
-                  <h4 className="text-[#ededed] font-medium mb-1 group-hover:text-[#00dc82] transition-colors">
-                    {project.name}
-                  </h4>
-                  <p className="text-[#444] text-sm line-clamp-2 mb-4">{project.prompt}</p>
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#444]">{formatDate(project.updated_at)}</span>
-                    <span className="text-[#333] uppercase tracking-wider">{project.framework}</span>
+                    {/* Card content */}
+                    <div className="p-4">
+                      <h4 className="text-[#ededed] font-semibold mb-1 group-hover:text-[#00dc82] transition-colors">
+                        {project.name}
+                      </h4>
+                      <p className="text-[#666] text-sm">
+                        Edited {formatDate(project.updated_at)}
+                      </p>
+                    </div>
                   </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </main>

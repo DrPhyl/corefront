@@ -11,11 +11,11 @@ const suggestions = [
 ];
 
 const frameworks = [
-  { name: "React", icon: "⚛️" },
-  { name: "Vue", icon: "💚" },
-  { name: "Svelte", icon: "🔥" },
-  { name: "Next.js", icon: "▲" },
-  { name: "FastAPI", icon: "⚡" },
+  { name: "React", color: "text-cyan-400" },
+  { name: "Vue", color: "text-emerald-400" },
+  { name: "Svelte", color: "text-orange-400" },
+  { name: "Next.js", color: "text-white" },
+  { name: "FastAPI", color: "text-emerald-400" },
 ];
 
 const steps = [
@@ -90,11 +90,11 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#000000]">
+    <div className="min-h-screen bg-[#0d0d0d]">
       {/* NAV */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-          scrolled ? "bg-[#000000]/80 backdrop-blur-xl border-b border-[#222]" : ""
+          scrolled ? "bg-[#0d0d0d]/80 backdrop-blur-xl border-b border-[#222]" : ""
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -168,19 +168,9 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-3">
-            <div className="flex -space-x-2">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-[#222] to-[#111] border-2 border-[#000] flex items-center justify-center text-xs text-[#444]"
-                >
-                  {String.fromCharCode(65 + i)}
-                </div>
-              ))}
-            </div>
-            <span className="text-[#444] text-sm">Trusted by 1,200+ developers</span>
-          </div>
+          <p className="text-[#666] text-sm">
+            Join 1,200+ developers building with AI
+          </p>
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
@@ -230,7 +220,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="card p-6 bg-[#000] border-[#222]">
+            <div className="card p-6 bg-[#0a0a0a] border-[#1a1a1a]">
               <div className="flex items-center gap-2 mb-4">
                 <span className="w-3 h-3 rounded-full bg-[#ef4444]" />
                 <span className="w-3 h-3 rounded-full bg-[#f5a623]" />
@@ -279,16 +269,18 @@ export default function LandingPage() {
       </section>
 
       {/* FRAMEWORKS */}
-      <section className="py-24 px-6 border-y border-[#222]">
+      <section className="py-24 px-6 border-y border-[#1a1a1a]">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-[#444] text-sm uppercase tracking-wider mb-8">
+          <h2 className="text-[#666] text-sm uppercase tracking-wider mb-8">
             Supports your favorite frameworks
           </h2>
-          <div className="flex flex-wrap justify-center gap-12">
+          <div className="flex flex-wrap justify-center gap-8">
             {frameworks.map((fw) => (
-              <div key={fw.name} className="hover-lift cursor-default">
-                <div className="text-3xl mb-2">{fw.icon}</div>
-                <div className="text-[#888] text-sm">{fw.name}</div>
+              <div
+                key={fw.name}
+                className="px-4 py-2 bg-[#111] border border-[#1a1a1a] rounded-lg hover:border-[#333] transition-colors cursor-default"
+              >
+                <span className={`text-sm font-medium ${fw.color}`}>{fw.name}</span>
               </div>
             ))}
           </div>
