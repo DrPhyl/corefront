@@ -27,21 +27,21 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#000] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#09090b] p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-[#00dc82] text-2xl glow-green-text">⬡</span>
-            <span className="text-[#ededed] font-semibold text-lg">corefront</span>
+            <span className="text-gradient text-3xl font-bold glow-accent-text">⬡</span>
+            <span className="text-[#fafafa] font-semibold text-lg">corefront</span>
           </Link>
         </div>
 
         {/* Card */}
-        <div className="bg-[#0a0a0a] rounded-xl p-8">
+        <div className="bg-[#111113] border border-[#27272a] rounded-xl p-8">
           <div className="text-center mb-6">
-            <h1 className="text-[#ededed] text-xl font-semibold mb-1">Create an account</h1>
-            <p className="text-[#444] text-sm">Start building with AI</p>
+            <h1 className="text-[#fafafa] text-xl font-semibold mb-1">Create an account</h1>
+            <p className="text-[#52525b] text-sm">Start building with AI</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -52,7 +52,7 @@ export default function RegisterPage() {
             )}
 
             <div>
-              <label htmlFor="fullName" className="block text-[#888] text-sm mb-2">
+              <label htmlFor="fullName" className="block text-[#a1a1aa] text-sm mb-2">
                 Full Name
               </label>
               <input
@@ -66,7 +66,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-[#888] text-sm mb-2">
+              <label htmlFor="email" className="block text-[#a1a1aa] text-sm mb-2">
                 Email
               </label>
               <input
@@ -81,7 +81,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-[#888] text-sm mb-2">
+              <label htmlFor="password" className="block text-[#a1a1aa] text-sm mb-2">
                 Password
               </label>
               <input
@@ -94,7 +94,7 @@ export default function RegisterPage() {
                 minLength={8}
                 className="input"
               />
-              <p className="mt-1.5 text-[#444] text-xs">Must be at least 8 characters</p>
+              <p className="mt-1.5 text-[#52525b] text-xs">Must be at least 8 characters</p>
             </div>
 
             <button
@@ -104,7 +104,7 @@ export default function RegisterPage() {
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-[#000] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Creating account...
                 </div>
               ) : (
@@ -114,9 +114,9 @@ export default function RegisterPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-[#444] text-sm">
+            <p className="text-[#52525b] text-sm">
               Already have an account?{" "}
-              <Link href="/login" className="text-[#00dc82] hover:underline">
+              <Link href="/login" className="text-[#f97316] hover:text-[#ec4899] transition-colors">
                 Sign in
               </Link>
             </p>

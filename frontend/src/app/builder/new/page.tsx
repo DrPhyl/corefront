@@ -49,8 +49,8 @@ function NewProjectContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#000]">
-        <div className="w-6 h-6 border-2 border-[#00dc82] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
+        <div className="w-6 h-6 border-2 border-[#f97316] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -58,19 +58,19 @@ function NewProjectContent() {
   if (!user) return null;
 
   const frameworks = [
-    { id: "react", name: "React", icon: "⚛️" },
-    { id: "vue", name: "Vue", icon: "💚" },
-    { id: "svelte", name: "Svelte", icon: "🔥" },
+    { id: "react", name: "React", color: "text-cyan-400" },
+    { id: "vue", name: "Vue", color: "text-emerald-400" },
+    { id: "svelte", name: "Svelte", color: "text-orange-400" },
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#000] flex flex-col">
+    <div className="min-h-screen bg-[#09090b] flex flex-col">
       {/* Top bar */}
-      <header className="h-12 border-b border-[#222] flex items-center px-4">
+      <header className="h-12 border-b border-[#27272a] flex items-center px-4">
         <Link href="/dashboard" className="flex items-center gap-4">
-          <span className="text-[#00dc82] text-lg">⬡</span>
-          <span className="text-[#333]">/</span>
-          <span className="text-[#ededed] text-sm">New Project</span>
+          <span className="text-gradient text-lg font-bold">⬡</span>
+          <span className="text-[#3f3f46]">/</span>
+          <span className="text-[#fafafa] text-sm">New Project</span>
         </Link>
       </header>
 
@@ -78,8 +78,8 @@ function NewProjectContent() {
       <main className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-lg">
           <div className="text-center mb-8">
-            <h1 className="text-[#ededed] text-2xl font-semibold mb-2">Create new project</h1>
-            <p className="text-[#444] text-sm">Describe what you want to build</p>
+            <h1 className="text-[#fafafa] text-2xl font-semibold mb-2">Create new project</h1>
+            <p className="text-[#52525b] text-sm">Describe what you want to build</p>
           </div>
 
           {error && (
@@ -91,7 +91,7 @@ function NewProjectContent() {
           <div className="space-y-6">
             {/* Project name */}
             <div>
-              <label className="block text-[#888] text-sm mb-2">Project name</label>
+              <label className="block text-[#a1a1aa] text-sm mb-2">Project name</label>
               <input
                 type="text"
                 value={name}
@@ -103,7 +103,7 @@ function NewProjectContent() {
 
             {/* Framework */}
             <div>
-              <label className="block text-[#888] text-sm mb-2">Framework</label>
+              <label className="block text-[#a1a1aa] text-sm mb-2">Framework</label>
               <div className="grid grid-cols-3 gap-3">
                 {frameworks.map((fw) => (
                   <button
@@ -111,12 +111,11 @@ function NewProjectContent() {
                     onClick={() => setFramework(fw.id)}
                     className={`p-4 rounded-lg border transition-all text-center ${
                       framework === fw.id
-                        ? "bg-[#00dc82]/10 border-[#00dc82] text-[#ededed]"
-                        : "bg-[#111] border-[#222] text-[#888] hover:border-[#333]"
+                        ? "border-gradient bg-[#18181b]"
+                        : "bg-[#18181b] border-[#27272a] hover:border-[#3f3f46]"
                     }`}
                   >
-                    <div className="text-2xl mb-1">{fw.icon}</div>
-                    <div className="text-sm">{fw.name}</div>
+                    <div className={`text-sm font-medium ${fw.color}`}>{fw.name}</div>
                   </button>
                 ))}
               </div>
@@ -124,7 +123,7 @@ function NewProjectContent() {
 
             {/* Prompt */}
             <div>
-              <label className="block text-[#888] text-sm mb-2">Description</label>
+              <label className="block text-[#a1a1aa] text-sm mb-2">Description</label>
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -142,7 +141,7 @@ function NewProjectContent() {
             >
               {generating ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-[#000] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Generating...
                 </div>
               ) : (
@@ -159,8 +158,8 @@ function NewProjectContent() {
 export default function NewProjectPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#000]">
-        <div className="w-6 h-6 border-2 border-[#00dc82] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
+        <div className="w-6 h-6 border-2 border-[#f97316] border-t-transparent rounded-full animate-spin" />
       </div>
     }>
       <NewProjectContent />

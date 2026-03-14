@@ -117,8 +117,8 @@ export default function BuilderPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#000]">
-        <div className="w-6 h-6 border-2 border-[#00dc82] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
+        <div className="w-6 h-6 border-2 border-[#f97316] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -128,19 +128,19 @@ export default function BuilderPage() {
   return (
     <div
       ref={containerRef}
-      className="h-screen bg-[#000] flex flex-col overflow-hidden"
+      className="h-screen bg-[#09090b] flex flex-col overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
       {/* Top bar - 48px */}
-      <header className="h-12 border-b border-[#222] flex items-center justify-between px-4 shrink-0">
+      <header className="h-12 border-b border-[#27272a] flex items-center justify-between px-4 shrink-0 bg-[#09090b]">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-[#00dc82] text-lg">⬡</Link>
-          <span className="text-[#333]">/</span>
-          <span className="text-[#ededed] text-sm font-medium">{project?.name || "New Project"}</span>
+          <Link href="/dashboard" className="text-gradient text-lg font-bold">⬡</Link>
+          <span className="text-[#3f3f46]">/</span>
+          <span className="text-[#fafafa] text-sm font-medium">{project?.name || "New Project"}</span>
           {project && (
-            <span className="text-[#444] text-xs uppercase tracking-wider">{project.framework}</span>
+            <span className="text-[#52525b] text-xs uppercase tracking-wider">{project.framework}</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -153,12 +153,12 @@ export default function BuilderPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left panel - Chat */}
         <div
-          className="flex flex-col bg-[#0a0a0a] border-r border-[#222]"
+          className="flex flex-col bg-[#111113] border-r border-[#27272a]"
           style={{ width: `${splitPosition}%` }}
         >
           {/* Model selector */}
-          <div className="h-10 border-b border-[#222] flex items-center px-4">
-            <select className="bg-transparent text-[#888] text-sm focus:outline-none cursor-pointer">
+          <div className="h-10 border-b border-[#27272a] flex items-center px-4 bg-[#09090b]">
+            <select className="bg-transparent text-[#a1a1aa] text-sm focus:outline-none cursor-pointer">
               <option>Claude 3.5 Sonnet</option>
               <option>Claude 3 Opus</option>
             </select>
@@ -169,7 +169,7 @@ export default function BuilderPage() {
             {messages.length === 0 ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-[#444] text-sm">Start a conversation</div>
+                  <div className="text-[#52525b] text-sm">Start a conversation</div>
                 </div>
               </div>
             ) : (
@@ -177,8 +177,8 @@ export default function BuilderPage() {
                 <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[85%] rounded-lg px-4 py-2.5 ${
                     message.role === "user"
-                      ? "bg-[#00dc82] text-[#000]"
-                      : "bg-[#111] text-[#ededed] border border-[#222]"
+                      ? "bg-gradient-to-r from-[#f97316] to-[#ec4899] text-white"
+                      : "bg-[#18181b] text-[#fafafa] border border-[#27272a]"
                   }`}>
                     <p className="text-sm">{message.content}</p>
                   </div>
@@ -187,10 +187,10 @@ export default function BuilderPage() {
             )}
             {generating && (
               <div className="flex justify-start">
-                <div className="bg-[#111] border border-[#222] rounded-lg px-4 py-2.5">
+                <div className="bg-[#18181b] border border-[#27272a] rounded-lg px-4 py-2.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-[#00dc82] rounded-full animate-pulse" />
-                    <span className="text-[#888] text-sm">Generating...</span>
+                    <div className="w-1.5 h-1.5 bg-gradient-to-r from-[#f97316] to-[#ec4899] rounded-full animate-pulse" />
+                    <span className="text-[#a1a1aa] text-sm">Generating...</span>
                   </div>
                 </div>
               </div>
@@ -199,7 +199,7 @@ export default function BuilderPage() {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t border-[#222]">
+          <div className="p-4 border-t border-[#27272a] bg-[#09090b]">
             <div className="relative">
               <textarea
                 value={prompt}
@@ -212,12 +212,12 @@ export default function BuilderPage() {
                 }}
                 placeholder="Ask to modify the code..."
                 rows={2}
-                className="w-full px-4 py-3 bg-[#111] border border-[#222] rounded-lg text-[#ededed] placeholder-[#444] text-sm focus:outline-none focus:border-[#333] resize-none"
+                className="w-full px-4 py-3 bg-[#18181b] border border-[#27272a] rounded-lg text-[#fafafa] placeholder-[#52525b] text-sm focus:outline-none focus:border-[#f97316] resize-none pr-12"
               />
               <button
                 onClick={handleSend}
                 disabled={!prompt.trim() || generating}
-                className="absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center rounded-md bg-[#00dc82] text-[#000] disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                className="absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center rounded-md bg-gradient-to-r from-[#f97316] to-[#ec4899] text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -229,30 +229,33 @@ export default function BuilderPage() {
 
         {/* Resizer */}
         <div
-          className="w-px bg-[#00dc82] cursor-col-resize hover:w-0.5 transition-all"
+          className="w-px bg-gradient-to-b from-[#f97316] to-[#ec4899] cursor-col-resize hover:w-0.5 transition-all"
           onMouseDown={handleMouseDown}
         />
 
         {/* Right panel - Code */}
-        <div className="flex-1 flex flex-col bg-[#000]">
+        <div className="flex-1 flex flex-col bg-[#09090b]">
           {/* Tab bar */}
-          <div className="h-10 border-b border-[#222] flex items-center px-4 gap-1">
+          <div className="h-10 border-b border-[#27272a] flex items-center px-4 gap-1">
             {(["preview", "code", "files"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                className={`relative px-3 py-1.5 text-sm rounded transition-colors ${
                   activeTab === tab
-                    ? "bg-[#111] text-[#ededed]"
-                    : "text-[#444] hover:text-[#888]"
+                    ? "text-[#fafafa]"
+                    : "text-[#52525b] hover:text-[#a1a1aa]"
                 }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {activeTab === tab && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#f97316] to-[#ec4899]" />
+                )}
               </button>
             ))}
             <div className="flex-1" />
             {activeTab === "code" && (
-              <button onClick={copyCode} className="text-[#444] hover:text-[#888] text-sm transition-colors">
+              <button onClick={copyCode} className="text-[#52525b] hover:text-[#a1a1aa] text-sm transition-colors">
                 Copy
               </button>
             )}
@@ -261,7 +264,7 @@ export default function BuilderPage() {
           {/* Tab content */}
           <div className="flex-1 overflow-auto">
             {activeTab === "preview" && (
-              <div className="h-full flex items-center justify-center text-[#444] text-sm">
+              <div className="h-full flex items-center justify-center text-[#52525b] text-sm">
                 Preview coming soon
               </div>
             )}
@@ -273,14 +276,14 @@ export default function BuilderPage() {
                     <code>
                       {project.generated_code.split("\n").map((line, i) => (
                         <div key={i} className="flex">
-                          <span className="w-12 text-right pr-4 text-[#333] select-none">{i + 1}</span>
-                          <span className="text-[#ededed]">{line || " "}</span>
+                          <span className="w-12 text-right pr-4 text-[#3f3f46] select-none">{i + 1}</span>
+                          <span className="text-[#fafafa]">{line || " "}</span>
                         </div>
                       ))}
                     </code>
                   </pre>
                 ) : (
-                  <div className="h-full flex items-center justify-center text-[#444]">
+                  <div className="h-full flex items-center justify-center text-[#52525b]">
                     No code generated yet
                   </div>
                 )}
@@ -289,14 +292,14 @@ export default function BuilderPage() {
 
             {activeTab === "files" && (
               <div className="p-4">
-                <div className="text-[#444] text-sm">
+                <div className="text-[#52525b] text-sm">
                   {project ? (
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-[#888]">
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
                         <span>📄</span>
                         <span>App.tsx</span>
                       </div>
-                      <div className="flex items-center gap-2 text-[#888]">
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
                         <span>📄</span>
                         <span>index.css</span>
                       </div>
