@@ -17,7 +17,11 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    return os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/corefront")
+    """Get database URL, converting postgres:// to postgresql+psycopg2:// for SQLAlchemy."""
+    url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/corefront")
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+    return url
 
 
 def run_migrations_offline() -> None:
