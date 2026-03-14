@@ -17,10 +17,11 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    """Get database URL, converting postgres:// to postgresql+psycopg2:// for SQLAlchemy."""
-    url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/corefront")
+    url = os.environ.get("DATABASE_URL", "")
     if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+        url = "postgresql+psycopg2://" + url[len("postgres://"):]
+    elif url.startswith("postgresql://"):
+        url = "postgresql+psycopg2://" + url[len("postgresql://"):]
     return url
 
 
