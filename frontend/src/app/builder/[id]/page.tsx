@@ -48,7 +48,7 @@ export default function BuilderPage() {
 
   const loadProject = async () => {
     try {
-      const data = await api.getProject(projectId);
+      const data = await api.getProject(Number(projectId));
       setProject(data);
       if (data.prompt) {
         setMessages([
