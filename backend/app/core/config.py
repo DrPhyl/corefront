@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://redis:6379/0"
 
     # CORS
-    CORS_ORIGINS: str = "http://localhost:3000,https://corefront.ai"
+    CORS_ORIGINS: str = "http://localhost:3000,https://corefront.ai,https://selfless-tenderness-production.up.railway.app"
 
 
 @lru_cache()
