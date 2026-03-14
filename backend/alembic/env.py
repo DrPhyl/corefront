@@ -17,6 +17,18 @@ target_metadata = Base.metadata
 
 
 def get_url():
+    """Build database URL from individual PG* env vars or fall back to DATABASE_URL."""
+    # Try individual PostgreSQL variables first (Railway provides these)
+    host = os.environ.get("PGHOST")
+    port = os.environ.get("PGPORT", "5432")
+    database = os.environ.get("PGDATABASE")
+    user = os.environ.get("PGUSER")
+    password = os.environ.get("PGPASSWORD")
+
+    if all([host, database, user, password]):
+        return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
+
+    # Fall back to DATABASE_URL
     url = os.environ.get("DATABASE_URL", "")
     if url.startswith("postgres://"):
         url = "postgresql+psycopg2://" + url[len("postgres://"):]
