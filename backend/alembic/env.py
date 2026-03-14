@@ -18,11 +18,6 @@ target_metadata = Base.metadata
 
 def get_url():
     """Build database URL from individual PG* env vars or fall back to DATABASE_URL."""
-    print(f"PGHOST={os.environ.get('PGHOST', 'NOT SET')}")
-    print(f"PGPORT={os.environ.get('PGPORT', 'NOT SET')}")
-    print(f"PGDATABASE={os.environ.get('PGDATABASE', 'NOT SET')}")
-    print(f"PGUSER={os.environ.get('PGUSER', 'NOT SET')}")
-    print(f"DATABASE_URL={os.environ.get('DATABASE_URL', 'NOT SET')}")
     # Try individual PostgreSQL variables first (Railway provides these)
     host = os.environ.get("PGHOST")
     port = os.environ.get("PGPORT", "5432")
