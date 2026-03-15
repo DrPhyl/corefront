@@ -1,9 +1,7 @@
 from datetime import datetime, timezone
-
 from sqlalchemy import String, Text, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
-
 from app.db.base import Base
 
 
@@ -11,6 +9,8 @@ class Framework(str, enum.Enum):
     REACT = "react"
     VUE = "vue"
     SVELTE = "svelte"
+    NEXTJS = "nextjs"
+    FASTAPI = "fastapi"
 
 
 class ProjectStatus(str, enum.Enum):
@@ -38,5 +38,4 @@ class Project(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
-    # Relationship
     user = relationship("User", backref="projects")
