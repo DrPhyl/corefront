@@ -8,6 +8,8 @@ class Framework(str, Enum):
     REACT = "react"
     VUE = "vue"
     SVELTE = "svelte"
+    NEXTJS = "nextjs"
+    FASTAPI = "fastapi"
 
 
 class ProjectStatus(str, Enum):
