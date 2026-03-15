@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -21,7 +21,7 @@ const PLAN_META = {
 
 type Tab = 'profile' | 'billing' | 'apikeys'
 
-export default function SettingsPage() {
+function SettingsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'profile')
@@ -103,19 +103,16 @@ export default function SettingsPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
         *, *::before, *::after { box-sizing: border-box; }
-        input, textarea { -webkit-font-smoothing: antialiased; }
         input::placeholder { color: #334155; }
       `}</style>
 
       <div style={{ padding: '40px 48px', maxWidth: 760, fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
 
-        {/* Header */}
         <div style={{ marginBottom: 32 }}>
           <h1 style={{ margin: '0 0 6px', fontSize: 28, fontWeight: 700, fontFamily: '"Instrument Serif",Georgia,serif', color: '#f8fafc' }}>Settings</h1>
           <p style={{ margin: 0, fontSize: 14, color: '#475569' }}>Manage your account and billing</p>
         </div>
 
-        {/* Tabs */}
         <div style={{ display: 'flex', gap: 4, marginBottom: 32, background: '#0d1427', padding: 4, borderRadius: 10, width: 'fit-content', border: '1px solid rgba(255,255,255,0.06)' }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
@@ -123,17 +120,14 @@ export default function SettingsPage() {
               background: tab === t.key ? '#1e2d4a' : 'transparent',
               color: tab === t.key ? '#e2e8f0' : '#475569',
               transition: 'all 0.15s',
-              boxShadow: tab === t.key ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
             }}>
               {t.label}
             </button>
           ))}
         </div>
 
-        {/* ── PROFILE TAB ── */}
         {tab === 'profile' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
             <div style={{ background: '#0d1427', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '28px 32px' }}>
               <h3 style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 600, color: '#f1f5f9' }}>Personal info</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -152,10 +146,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button onClick={handleSaveProfile} disabled={saving} style={{
-                    background: 'linear-gradient(135deg,#2563eb,#7c3aed)', color: '#fff', border: 'none',
-                    borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                  }}>
+                  <button onClick={handleSaveProfile} disabled={saving} style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                     {saved ? '✓ Saved' : saving ? 'Saving...' : 'Save changes'}
                   </button>
                 </div>
@@ -181,24 +172,17 @@ export default function SettingsPage() {
                 ))}
                 {pwError && <div style={{ fontSize: 13, color: '#ef4444' }}>{pwError}</div>}
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button onClick={handleChangePassword} disabled={saving} style={{
-                    background: 'rgba(255,255,255,0.06)', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                  }}>
+                  <button onClick={handleChangePassword} disabled={saving} style={{ background: 'rgba(255,255,255,0.06)', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                     {saving ? 'Saving...' : 'Update password'}
                   </button>
                 </div>
               </div>
             </div>
-
           </div>
         )}
 
-        {/* ── BILLING TAB ── */}
         {tab === 'billing' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-            {/* Current plan */}
             <div style={{ background: '#0d1427', border: `1px solid ${plan.border}`, borderRadius: 14, padding: '28px 32px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#f1f5f9' }}>Current plan</h3>
@@ -224,51 +208,37 @@ export default function SettingsPage() {
               )}
             </div>
 
-            {/* Upgrade cards */}
             {user?.plan === 'free' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 {[
-                  {
-                    name: 'Pro', price: '$29', period: '/month',
-                    color: '#7c3aed', border: 'rgba(124,58,237,0.3)', bg: 'rgba(124,58,237,0.06)',
-                    features: ['Unlimited generations', 'All frameworks', 'Private projects', 'API access', 'Priority support'],
-                  },
-                  {
-                    name: 'Team', price: '$99', period: '/month',
-                    color: '#2563eb', border: 'rgba(37,99,235,0.3)', bg: 'rgba(37,99,235,0.06)',
-                    features: ['Everything in Pro', 'Team collaboration', 'SSO & SAML', 'Dedicated support', 'Custom integrations'],
-                  },
+                  { name: 'Pro', price: '$29', color: '#7c3aed', border: 'rgba(124,58,237,0.3)', features: ['Unlimited generations','All frameworks','Private projects','API access','Priority support'] },
+                  { name: 'Team', price: '$99', color: '#2563eb', border: 'rgba(37,99,235,0.3)', features: ['Everything in Pro','Team collaboration','SSO & SAML','Dedicated support','Custom integrations'] },
                 ].map(p => (
-                  <div key={p.name} style={{ background: '#0d1427', border: `1px solid ${p.border}`, borderRadius: 14, padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div key={p.name} style={{ background: '#0d1427', border: `1px solid ${p.border}`, borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div>
                       <div style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', marginBottom: 4 }}>{p.name}</div>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
                         <span style={{ fontSize: 32, fontWeight: 800, color: '#f8fafc' }}>{p.price}</span>
-                        <span style={{ fontSize: 14, color: '#475569' }}>{p.period}</span>
+                        <span style={{ fontSize: 14, color: '#475569' }}>/month</span>
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {p.features.map(f => (
                         <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#94a3b8' }}>
-                          <span style={{ color: p.color, fontSize: 14 }}>✓</span> {f}
+                          <span style={{ color: p.color }}>✓</span> {f}
                         </div>
                       ))}
                     </div>
-                    <button style={{
-                      background: `linear-gradient(135deg,${p.color},${p.color}dd)`,
-                      color: '#fff', border: 'none', borderRadius: 9, padding: '11px', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 'auto',
-                    }}>
+                    <button style={{ background: `linear-gradient(135deg,${p.color},${p.color}dd)`, color: '#fff', border: 'none', borderRadius: 9, padding: 11, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 'auto' }}>
                       Upgrade to {p.name} →
                     </button>
                   </div>
                 ))}
               </div>
             )}
-
           </div>
         )}
 
-        {/* ── API KEYS TAB ── */}
         {tab === 'apikeys' && (
           <div style={{ background: '#0d1427', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '28px 32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -277,7 +247,7 @@ export default function SettingsPage() {
                 + Create key
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 0', color: '#334155', textAlign: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 0', textAlign: 'center', gap: 8 }}>
               <div style={{ fontSize: 32 }}>🔑</div>
               <div style={{ fontSize: 14, color: '#475569' }}>No API keys yet</div>
               <div style={{ fontSize: 13, color: '#334155' }}>Create a key to access the Corefront API programmatically</div>
@@ -287,5 +257,17 @@ export default function SettingsPage() {
 
       </div>
     </>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#070b14', color: '#475569', fontSize: 14 }}>
+        Loading...
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   )
 }
