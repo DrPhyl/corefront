@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Corefront - AI-Powered App Builder",
   description:
-    "Build full-stack apps from simple prompts with Claude AI",
+    "Build full-stack apps from simple prompts with AI",
 };
 
 export default function RootLayout({

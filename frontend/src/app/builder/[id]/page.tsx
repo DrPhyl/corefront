@@ -171,8 +171,8 @@ export default function BuilderPage() {
           {/* Model selector */}
           <div className="h-10 border-b border-[#1e2d4a] flex items-center px-4 bg-[#070b14]">
             <select className="bg-transparent text-[#7c8db5] text-sm focus:outline-none cursor-pointer">
-              <option>Claude 3.5 Sonnet</option>
-              <option>Claude 3 Opus</option>
+              <option>GPT-4o</option>
+              <option>Gemini Pro</option>
             </select>
           </div>
 

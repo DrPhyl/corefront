@@ -42,7 +42,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3">
             <LogoMark className="w-10 h-10" />
-            <span className="font-logo text-white text-2xl">corefront</span>
+            <span style={{fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: 'italic', fontSize: '26px', color: '#ffffff', letterSpacing: '0.02em'}}>corefront</span>
           </Link>
         </div>
 

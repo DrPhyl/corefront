@@ -1,5 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
 
 @layer base {
   :root {
@@ -57,6 +57,14 @@
 }
 
 /* ===== TYPOGRAPHY ===== */
+.font-serif {
+  font-family: 'Instrument Serif', Georgia, serif;
+}
+
+.font-sans {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
 .font-display {
   font-family: 'Inter', sans-serif;
   font-weight: 800;
@@ -64,7 +72,7 @@
 }
 
 .font-logo {
-  font-family: 'Instrument Serif', serif;
+  font-family: 'Instrument Serif', Georgia, serif;
   font-weight: 400;
   font-style: italic;
   letter-spacing: 0.02em;

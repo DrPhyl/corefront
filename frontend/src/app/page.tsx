@@ -37,7 +37,7 @@ const steps = [
   {
     num: "02",
     title: "Generate",
-    desc: "Claude AI analyzes your requirements and generates production-ready code with best practices.",
+    desc: "AI analyzes your requirements and generates production-ready code with best practices.",
   },
   {
     num: "03",
@@ -110,7 +110,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <LogoMark />
-            <span className="font-logo text-white text-xl">corefront</span>
+            <span style={{fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: 'italic', fontSize: '22px', color: '#ffffff', letterSpacing: '0.02em'}}>corefront</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <Link href="#" className="text-[#c8d4f0] hover:text-white text-sm transition-colors">Product</Link>
@@ -133,16 +133,14 @@ export default function LandingPage() {
         <div className="dot-grid dot-grid-animated" />
         <div className="absolute inset-0 bg-glow-blue pointer-events-none" />
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[80px] text-white font-bold leading-[1.1] mb-6">
-            Ship full-stack apps
-            <br />
+        <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
+          <h1 style={{fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 'clamp(52px, 7vw, 88px)', fontWeight: 400, color: '#ffffff', lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '24px'}}>
+            Ship <em style={{fontStyle: 'italic'}}>full-stack apps</em><br/>
             at the speed of thought.
           </h1>
 
-          <p className="text-[#c8d4f0] text-lg md:text-xl max-w-[560px] mx-auto mb-10">
-            Describe what you want to build. Corefront generates the architecture,
-            components, and APIs — powered by Claude AI.
+          <p style={{fontFamily: "'Inter', sans-serif", fontSize: '18px', fontWeight: 300, color: '#c8d4f0', lineHeight: 1.7, maxWidth: '520px', textAlign: 'center', marginBottom: '40px'}}>
+            Describe what you want to build. Corefront generates the architecture, components, and APIs — instantly.
           </p>
 
           <div className="max-w-[680px] mx-auto mb-6">
@@ -359,17 +357,13 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <LogoMark className="w-6 h-6" />
             <span className="text-[#c8d4f0] text-sm">
-              <span className="font-logo text-white">corefront</span> — Build apps at the speed of thought.
+              <span style={{fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: 'italic', fontSize: '16px', color: '#ffffff', letterSpacing: '0.02em'}}>corefront</span> — Build apps at the speed of thought.
             </span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="#" className="text-[#7c8db5] hover:text-white text-sm transition-colors">Twitter</Link>
             <Link href="#" className="text-[#7c8db5] hover:text-white text-sm transition-colors">GitHub</Link>
             <Link href="#" className="text-[#7c8db5] hover:text-white text-sm transition-colors">Discord</Link>
-            <span className="text-[#1e2d4a]">|</span>
-            <span className="text-[#7c8db5] text-sm flex items-center gap-1">
-              Built with <span className="text-[#2563eb]">Claude AI</span>
-            </span>
           </div>
         </div>
       </footer>
