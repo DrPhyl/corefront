@@ -6,13 +6,12 @@ Create Date: 2024-03-15 00:00:00.000000
 
 """
 from typing import Sequence, Union
-
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
-revision: str = "003"
-down_revision: Union[str, None] = "002"
+revision: str = '003'
+down_revision: Union[str, None] = '002'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -23,7 +22,7 @@ def upgrade() -> None:
     op.add_column('users', sa.Column('generations_used', sa.Integer(), nullable=False, server_default='0'))
     op.add_column('users', sa.Column('stripe_customer_id', sa.String(255), nullable=True))
 
-    # Add new values to framework enum
+    # Add new enum values using raw SQL (safe for PostgreSQL)
     op.execute("ALTER TYPE framework ADD VALUE IF NOT EXISTS 'nextjs'")
     op.execute("ALTER TYPE framework ADD VALUE IF NOT EXISTS 'fastapi'")
 
