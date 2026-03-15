@@ -1,265 +1,236 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/lib/api";
-import type { Project } from "@/types";
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-function LogoMark({ className = "" }: { className?: string }) {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className={`logo-mark ${className}`}>
-      <path d="M8 16 L16 8 L24 16 L16 24 Z" fill="white" opacity="0.9"/>
-      <path d="M4 16 L16 4 L28 16 L16 28" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4"/>
-      <circle cx="16" cy="16" r="2.5" fill="#2563eb"/>
-    </svg>
-  );
+type Plan = 'free' | 'pro' | 'team'
+
+interface User {
+  id: number
+  email: string
+  full_name: string | null
+  plan: Plan
+  generations_used: number
+  generations_limit: number
+}
+
+interface Project {
+  id: number
+  name: string
+  prompt: string
+  framework: string
+  status: string
+  created_at: string
+  updated_at: string
+}
+
+const FW: Record<string, { label: string; color: string; bg: string }> = {
+  react:   { label: 'React',   color: '#61dafb', bg: 'rgba(97,218,251,0.10)' },
+  vue:     { label: 'Vue',     color: '#42b883', bg: 'rgba(66,184,131,0.10)' },
+  nextjs:  { label: 'Next.js', color: '#ffffff', bg: 'rgba(255,255,255,0.08)' },
+  svelte:  { label: 'Svelte',  color: '#ff3e00', bg: 'rgba(255,62,0,0.10)' },
+  fastapi: { label: 'FastAPI', color: '#009688', bg: 'rgba(0,150,136,0.10)' },
+}
+
+const PLAN_META: Record<Plan, { color: string; bg: string }> = {
+  free: { color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
+  pro:  { color: '#7c3aed', bg: 'rgba(124,58,237,0.15)' },
+  team: { color: '#2563eb', bg: 'rgba(37,99,235,0.15)' },
+}
+
+function timeAgo(d: string) {
+  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000)
+  if (s < 60) return 'just now'
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`
+  return `${Math.floor(s / 86400)}d ago`
 }
 
 export default function DashboardPage() {
-  const { user, loading: authLoading, logout } = useAuth();
-  const router = useRouter();
-
-  const [prompt, setPrompt] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (user) {
-      loadProjects();
-    }
-  }, [user]);
+    setMounted(true)
+    const token = localStorage.getItem('token')
+    if (!token) { router.push('/login'); return }
 
-  const loadProjects = async () => {
-    try {
-      const data = await api.getProjects();
-      setProjects(data);
-    } catch (err) {
-      console.error("Failed to load projects:", err);
-    }
-  };
+    const headers = { Authorization: `Bearer ${token}` }
+    const base = process.env.NEXT_PUBLIC_API_URL
 
-  const handleCreateProject = () => {
-    if (prompt.trim()) {
-      router.push(`/builder/new?prompt=${encodeURIComponent(prompt)}`);
-    }
-  };
+    Promise.all([
+      fetch(`${base}/api/v1/users/me`, { headers }).then(r => r.json()),
+      fetch(`${base}/api/v1/projects`, { headers }).then(r => r.json()),
+    ])
+      .then(([u, p]) => { setUser(u); setProjects(Array.isArray(p) ? p : []) })
+      .catch(() => router.push('/login'))
+      .finally(() => setLoading(false))
+  }, [])
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffHours < 1) return "Just now";
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
-  const getFrameworkStyle = (framework: string) => {
-    const styles: Record<string, { text: string; color: string }> = {
-      react: { text: "React", color: "text-cyan-400" },
-      vue: { text: "Vue", color: "text-emerald-400" },
-      svelte: { text: "Svelte", color: "text-orange-400" },
-      nextjs: { text: "Next.js", color: "text-white" },
-    };
-    return styles[framework] || { text: framework, color: "text-gray-400" };
-  };
-
-  const filteredProjects = projects.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#070b14]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-6 h-6 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
-          <span className="text-[#3a4a6b] text-sm">Loading...</span>
-        </div>
-      </div>
-    );
+  const handleDelete = async (id: number) => {
+    if (!confirm('Delete this project?')) return
+    const token = localStorage.getItem('token')
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    setProjects(prev => prev.filter(p => p.id !== id))
   }
 
-  if (!user) {
-    return null;
-  }
+  const filtered = projects.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.prompt.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const canGenerate = !user || user.plan !== 'free' || user.generations_used < user.generations_limit
+  const pct = user ? Math.min((user.generations_used / (user.generations_limit === -1 ? 1 : user.generations_limit)) * 100, 100) : 0
 
   return (
-    <div className="min-h-screen bg-[#070b14] flex">
-      {/* Sidebar - 64px, icons only */}
-      <aside className="w-16 bg-[#070b14] border-r border-[#1e2d4a] flex flex-col items-center py-4">
-        {/* Logo */}
-        <Link href="/" className="mb-8">
-          <LogoMark className="w-8 h-8" />
-        </Link>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .fade-up { animation: fadeUp 0.35s ease forwards; }
+      `}</style>
 
-        {/* Nav icons */}
-        <nav className="flex-1 flex flex-col items-center gap-2">
-          <button className="w-10 h-10 rounded-lg bg-[#0d1427] flex items-center justify-center relative group">
-            <svg className="w-5 h-5 text-[#f0f4ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span className="absolute left-1 top-1 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#2563eb] to-[#7c3aed]" />
-          </button>
-          <button className="w-10 h-10 rounded-lg hover:bg-[#0d1427] flex items-center justify-center transition-colors group">
-            <svg className="w-5 h-5 text-[#7c8db5] group-hover:text-[#f0f4ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-            </svg>
-          </button>
-          <button className="w-10 h-10 rounded-lg hover:bg-[#0d1427] flex items-center justify-center transition-colors group">
-            <svg className="w-5 h-5 text-[#7c8db5] group-hover:text-[#f0f4ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-        </nav>
+      <div style={{ padding: '40px 48px', maxWidth: 1200, opacity: mounted ? 1 : 0, transition: 'opacity 0.3s' }}>
 
-        {/* User avatar */}
-        <button
-          onClick={logout}
-          className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563eb] to-[#7c3aed] flex items-center justify-center text-white text-xs font-semibold"
-        >
-          {user.full_name?.[0] || user.email[0].toUpperCase()}
-        </button>
-      </aside>
-
-      {/* Main content */}
-      <div className="flex-1 bg-[#0a0f1e]">
-        {/* Top bar */}
-        <header className="h-14 border-b border-[#1e2d4a] flex items-center justify-between px-6 bg-[#070b14]">
-          <div className="flex items-center gap-3 text-sm">
-            <LogoMark className="w-5 h-5" />
-            <span className="text-[#1e2d4a]">/</span>
-            <span className="text-[#f0f4ff]">Dashboard</span>
-          </div>
-
-          {/* Search */}
-          <div className="flex-1 max-w-md mx-8">
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3a4a6b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-[#0d1427] border border-[#1e2d4a] rounded-lg text-[#f0f4ff] placeholder-[#3a4a6b] text-sm focus:outline-none focus:border-[#2563eb] transition-colors"
-              />
-            </div>
-          </div>
-
-          {/* User info */}
-          <span className="text-[#3a4a6b] text-sm">{user.email}</span>
-        </header>
-
-        {/* Content */}
-        <main className="p-8 max-w-6xl mx-auto">
-          {/* Hero prompt section - FIRST thing users see */}
-          <div className="text-center mb-12 pt-8">
-            <h1 className="text-white text-3xl font-semibold mb-3">
-              What do you want to build today?
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+          <div>
+            <h1 style={{ margin: '0 0 6px', fontSize: 28, fontWeight: 700, fontFamily: '"Instrument Serif", Georgia, serif', color: '#f8fafc' }}>
+              Your projects
             </h1>
-            <p className="text-[#c8d4f0] text-base mb-8">
-              Describe your app and let AI generate the code
+            <p style={{ margin: 0, fontSize: 14, color: '#475569' }}>
+              {loading ? 'Loading...' : `${projects.length} project${projects.length !== 1 ? 's' : ''}`}
             </p>
-            <div className="max-w-2xl mx-auto">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="A SaaS dashboard with authentication and billing..."
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCreateProject()}
-                  className="w-full px-6 py-4 bg-[#0d1427] border border-[#1e2d4a] rounded-2xl text-[#f0f4ff] placeholder-[#3a4a6b] text-base focus:outline-none focus:border-[#2563eb] focus:shadow-[0_0_30px_rgba(37,99,235,0.1)] transition-all pr-28"
-                />
-                <button
-                  onClick={handleCreateProject}
-                  disabled={!prompt.trim()}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-primary py-2.5 px-5 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Build →
-                </button>
-              </div>
-            </div>
           </div>
-
-          {/* Projects section header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[#f0f4ff] text-lg font-medium">Your projects</h2>
-            <Link href="/builder/new" className="btn btn-primary text-sm py-2 px-4">
-              + New project
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {user && (
+              <span style={{ fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 20, color: PLAN_META[user.plan].color, background: PLAN_META[user.plan].bg, border: `1px solid ${PLAN_META[user.plan].color}33`, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {user.plan}
+              </span>
+            )}
+            <Link href={canGenerate ? '/dashboard/new' : '/settings?tab=billing'} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: canGenerate ? 'linear-gradient(135deg, #2563eb, #7c3aed)' : 'rgba(255,255,255,0.06)',
+              color: canGenerate ? '#fff' : '#475569',
+              fontWeight: 600, fontSize: 14, padding: '10px 20px', borderRadius: 10,
+              textDecoration: 'none', border: canGenerate ? 'none' : '1px solid rgba(255,255,255,0.08)',
+            }}>
+              {canGenerate ? <><span style={{ fontSize: 18, marginTop: -1 }}>+</span> New project</> : 'Upgrade to continue →'}
             </Link>
           </div>
+        </div>
 
-          {/* Projects grid */}
-          {filteredProjects.length === 0 ? (
-            <div className="bg-[#0d1427] border border-[#1e2d4a] rounded-xl p-16 text-center">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#2563eb]/20 to-[#7c3aed]/20 flex items-center justify-center">
-                <svg className="w-8 h-8 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+        {/* Usage meter */}
+        {user?.plan === 'free' && (
+          <div style={{ background: '#0d1427', border: `1px solid ${pct >= 100 ? 'rgba(239,68,68,0.3)' : pct >= 80 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontSize: 13, color: '#94a3b8' }}>{pct >= 100 ? '⚠ Generation limit reached' : 'Generations this month'}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: pct >= 100 ? '#ef4444' : pct >= 80 ? '#f59e0b' : '#e2e8f0' }}>
+                  {user.generations_used} / {user.generations_limit}
+                </span>
               </div>
-              <h3 className="text-[#f0f4ff] font-medium text-lg mb-2">No projects yet</h3>
-              <p className="text-[#c8d4f0] text-sm mb-6">Create your first project to get started</p>
-              <Link href="/builder/new" className="btn btn-primary py-2.5 px-6">
-                Create project
+              <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 99 }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: pct >= 100 ? '#ef4444' : pct >= 80 ? '#f59e0b' : 'linear-gradient(90deg, #2563eb, #7c3aed)', borderRadius: 99, transition: 'width 0.6s ease' }} />
+              </div>
+            </div>
+            {pct >= 100 && (
+              <Link href="/settings?tab=billing" style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 500, padding: '8px 16px', borderRadius: 8, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                Upgrade →
               </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredProjects.map((project) => {
-                const fw = getFrameworkStyle(project.framework);
-                return (
-                  <div
-                    key={project.id}
-                    onClick={() => router.push(`/builder/${project.id}`)}
-                    className="bg-[#0d1427] border border-[#1e2d4a] rounded-xl overflow-hidden cursor-pointer transition-all hover:border-[#2563eb]/50 hover:shadow-[0_0_30px_rgba(37,99,235,0.08)] group"
-                  >
-                    {/* Thumbnail area */}
-                    <div className="h-32 bg-[#070b14] flex items-center justify-center relative">
-                      <span className={`text-sm font-medium ${fw.color}`}>{fw.text}</span>
-                      {/* 3-dot menu */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-[#3a4a6b] hover:text-[#7c8db5] hover:bg-[#1e2d4a] opacity-0 group-hover:opacity-100 transition-all"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <circle cx="12" cy="6" r="1.5" />
-                          <circle cx="12" cy="12" r="1.5" />
-                          <circle cx="12" cy="18" r="1.5" />
-                        </svg>
-                      </button>
-                    </div>
+            )}
+          </div>
+        )}
 
-                    {/* Card content */}
-                    <div className="p-4">
-                      <h4 className="text-[#f0f4ff] font-semibold mb-1 group-hover:text-[#60a5fa] transition-colors">
-                        {project.name}
-                      </h4>
-                      <p className="text-[#3a4a6b] text-sm">
-                        Edited {formatDate(project.updated_at)}
-                      </p>
-                    </div>
+        {/* Search */}
+        {projects.length > 0 && (
+          <div style={{ marginBottom: 24, position: 'relative' }}>
+            <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#475569', fontSize: 15, pointerEvents: 'none' }}>⌕</span>
+            <input type="text" placeholder="Search projects..." value={search} onChange={e => setSearch(e.target.value)}
+              style={{ width: '100%', maxWidth: 360, background: '#0d1427', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '10px 14px 10px 38px', color: '#e2e8f0', fontSize: 14, outline: 'none' }}
+              onFocus={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(37,99,235,0.4)'}
+              onBlur={e => (e.target as HTMLInputElement).style.borderColor = 'rgba(255,255,255,0.06)'}
+            />
+          </div>
+        )}
+
+        {/* Grid */}
+        {loading ? (
+          <div className="card-grid">
+            {[1,2,3].map(i => <div key={i} style={{ background: '#0d1427', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, height: 180, animation: 'pulse 1.4s ease-in-out infinite' }} />)}
+          </div>
+        ) : (
+          <div className="card-grid">
+            {filtered.length > 0 ? filtered.map((p, i) => {
+              const fw = FW[p.framework] || { label: p.framework, color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' }
+              return (
+                <div key={p.id} className="fade-up" style={{ animationDelay: `${i * 60}ms`, background: '#0d1427', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 14, transition: 'border-color 0.2s, transform 0.2s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(37,99,235,0.35)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 6, color: fw.color, background: fw.bg, border: `1px solid ${fw.color}22` }}>{fw.label}</span>
+                    <button onClick={() => handleDelete(p.id)} style={{ background: 'transparent', border: 'none', color: '#334155', cursor: 'pointer', fontSize: 13, padding: '4px 8px', borderRadius: 6 }}
+                      onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'}
+                      onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = '#334155'}
+                    >✕</button>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </main>
+                  <div>
+                    <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 600, color: '#f1f5f9', fontFamily: '"Instrument Serif", Georgia, serif' }}>{p.name}</h3>
+                    <p style={{ margin: 0, fontSize: 13, color: '#64748b', lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.prompt}</p>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                    <span style={{ fontSize: 12, color: '#475569' }}>Updated {timeAgo(p.updated_at)}</span>
+                    <Link href={`/builder/${p.id}`} style={{ fontSize: 13, fontWeight: 500, color: '#2563eb', textDecoration: 'none', padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(37,99,235,0.3)', background: 'rgba(37,99,235,0.06)' }}>
+                      Open →
+                    </Link>
+                  </div>
+                </div>
+              )
+            }) : projects.length === 0 ? (
+              <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 40px', textAlign: 'center' }}>
+                <div style={{ width: 72, height: 72, borderRadius: 18, background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, marginBottom: 20 }}>✦</div>
+                <h3 style={{ margin: '0 0 10px', fontSize: 20, fontWeight: 600, color: '#e2e8f0', fontFamily: '"Instrument Serif", Georgia, serif' }}>No projects yet</h3>
+                <p style={{ margin: '0 0 28px', fontSize: 14, color: '#475569', maxWidth: 320, lineHeight: 1.6 }}>Describe what you want to build and Corefront will generate it instantly.</p>
+                <Link href="/dashboard/new" style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, padding: '12px 24px', borderRadius: 10, textDecoration: 'none' }}>
+                  Start your first project →
+                </Link>
+              </div>
+            ) : (
+              <div style={{ gridColumn: '1 / -1', padding: '40px 0', textAlign: 'center', color: '#475569', fontSize: 14 }}>
+                No projects match "{search}"
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Stats */}
+        {projects.length > 0 && !loading && (
+          <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 32 }}>
+            {[
+              { label: 'Total projects', value: projects.length },
+              { label: 'Frameworks used', value: new Set(projects.map(p => p.framework)).size },
+              { label: 'Generations left', value: user?.plan === 'free' ? `${(user.generations_limit - user.generations_used)}` : 'Unlimited' },
+            ].map(s => (
+              <div key={s.label}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', marginBottom: 4 }}>{s.value}</div>
+                <div style={{ fontSize: 12, color: '#475569' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    </>
+  )
 }
