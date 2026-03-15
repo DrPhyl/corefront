@@ -7,6 +7,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import type { Project } from "@/types";
 
+function LogoMark({ className = "" }: { className?: string }) {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className={`logo-mark ${className}`}>
+      <path d="M8 16 L16 8 L24 16 L16 24 Z" fill="white" opacity="0.9"/>
+      <path d="M4 16 L16 4 L28 16 L16 28" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4"/>
+      <circle cx="16" cy="16" r="2.5" fill="#2563eb"/>
+    </svg>
+  );
+}
+
 export default function DashboardPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
@@ -89,7 +99,9 @@ export default function DashboardPage() {
       {/* Sidebar - 64px, icons only */}
       <aside className="w-16 bg-[#070b14] border-r border-[#1e2d4a] flex flex-col items-center py-4">
         {/* Logo */}
-        <Link href="/" className="text-[#2563eb] text-xl mb-8">⬡</Link>
+        <Link href="/" className="mb-8">
+          <LogoMark className="w-8 h-8" />
+        </Link>
 
         {/* Nav icons */}
         <nav className="flex-1 flex flex-col items-center gap-2">
@@ -125,8 +137,8 @@ export default function DashboardPage() {
       <div className="flex-1 bg-[#0a0f1e]">
         {/* Top bar */}
         <header className="h-14 border-b border-[#1e2d4a] flex items-center justify-between px-6 bg-[#070b14]">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-[#2563eb]">⬡</span>
+          <div className="flex items-center gap-3 text-sm">
+            <LogoMark className="w-5 h-5" />
             <span className="text-[#1e2d4a]">/</span>
             <span className="text-[#f0f4ff]">Dashboard</span>
           </div>
@@ -155,10 +167,10 @@ export default function DashboardPage() {
         <main className="p-8 max-w-6xl mx-auto">
           {/* Hero prompt section - FIRST thing users see */}
           <div className="text-center mb-12 pt-8">
-            <h1 className="text-[#f0f4ff] text-3xl font-semibold mb-3">
+            <h1 className="text-white text-3xl font-semibold mb-3">
               What do you want to build today?
             </h1>
-            <p className="text-[#3a4a6b] text-base mb-8">
+            <p className="text-[#c8d4f0] text-base mb-8">
               Describe your app and let AI generate the code
             </p>
             <div className="max-w-2xl mx-auto">
@@ -199,7 +211,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <h3 className="text-[#f0f4ff] font-medium text-lg mb-2">No projects yet</h3>
-              <p className="text-[#3a4a6b] text-sm mb-6">Create your first project to get started</p>
+              <p className="text-[#c8d4f0] text-sm mb-6">Create your first project to get started</p>
               <Link href="/builder/new" className="btn btn-primary py-2.5 px-6">
                 Create project
               </Link>

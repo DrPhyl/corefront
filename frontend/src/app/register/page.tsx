@@ -4,6 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
+function LogoMark({ className = "" }: { className?: string }) {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className={`logo-mark ${className}`}>
+      <path d="M8 16 L16 8 L24 16 L16 24 Z" fill="white" opacity="0.9"/>
+      <path d="M4 16 L16 4 L28 16 L16 28" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4"/>
+      <circle cx="16" cy="16" r="2.5" fill="#2563eb"/>
+    </svg>
+  );
+}
+
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,17 +41,17 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-[#2563eb] text-3xl glow-blue-text">⬡</span>
-            <span className="text-[#f0f4ff] font-semibold text-lg">corefront</span>
+          <Link href="/" className="inline-flex items-center gap-3">
+            <LogoMark className="w-10 h-10" />
+            <span className="font-logo text-white text-2xl">corefront</span>
           </Link>
         </div>
 
         {/* Card */}
         <div className="bg-[#0d1427] border border-[#1e2d4a] rounded-xl p-8">
           <div className="text-center mb-6">
-            <h1 className="text-[#f0f4ff] text-xl font-semibold mb-1">Create an account</h1>
-            <p className="text-[#3a4a6b] text-sm">Start building with AI</p>
+            <h1 className="text-white text-xl font-semibold mb-1">Create an account</h1>
+            <p className="text-[#c8d4f0] text-sm">Start building with AI</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,7 +104,7 @@ export default function RegisterPage() {
                 minLength={8}
                 className="input"
               />
-              <p className="mt-1.5 text-[#3a4a6b] text-xs">Must be at least 8 characters</p>
+              <p className="mt-1.5 text-[#7c8db5] text-xs">Must be at least 8 characters</p>
             </div>
 
             <button
@@ -114,7 +124,7 @@ export default function RegisterPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-[#3a4a6b] text-sm">
+            <p className="text-[#7c8db5] text-sm">
               Already have an account?{" "}
               <Link href="/login" className="text-[#2563eb] hover:text-[#60a5fa] transition-colors">
                 Sign in

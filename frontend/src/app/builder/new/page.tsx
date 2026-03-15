@@ -6,6 +6,16 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 
+function LogoMark({ className = "" }: { className?: string }) {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className={`logo-mark ${className}`}>
+      <path d="M8 16 L16 8 L24 16 L16 24 Z" fill="white" opacity="0.9"/>
+      <path d="M4 16 L16 4 L28 16 L16 28" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4"/>
+      <circle cx="16" cy="16" r="2.5" fill="#2563eb"/>
+    </svg>
+  );
+}
+
 function NewProjectContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -68,7 +78,7 @@ function NewProjectContent() {
       {/* Top bar */}
       <header className="h-12 border-b border-[#1e2d4a] flex items-center px-4">
         <Link href="/dashboard" className="flex items-center gap-4">
-          <span className="text-[#2563eb] text-lg">⬡</span>
+          <LogoMark className="w-6 h-6" />
           <span className="text-[#1e2d4a]">/</span>
           <span className="text-[#f0f4ff] text-sm">New Project</span>
         </Link>
@@ -78,8 +88,8 @@ function NewProjectContent() {
       <main className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-lg">
           <div className="text-center mb-8">
-            <h1 className="text-[#f0f4ff] text-2xl font-semibold mb-2">Create new project</h1>
-            <p className="text-[#3a4a6b] text-sm">Describe what you want to build</p>
+            <h1 className="text-white text-2xl font-semibold mb-2">Create new project</h1>
+            <p className="text-[#c8d4f0] text-sm">Describe what you want to build</p>
           </div>
 
           {error && (

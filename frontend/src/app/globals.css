@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
 
 @layer base {
   :root {
@@ -21,6 +21,7 @@
 
     /* Blue-tinted Text */
     --text-primary: #f0f4ff;
+    --text-body: #c8d4f0;
     --text-muted: #7c8db5;
     --text-dim: #3a4a6b;
 
@@ -62,8 +63,24 @@
   letter-spacing: -0.03em;
 }
 
+.font-logo {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
 .font-mono {
   font-family: 'JetBrains Mono', monospace;
+}
+
+/* ===== LOGO STYLES ===== */
+.logo-mark {
+  transition: filter 0.2s ease;
+}
+
+.logo-mark:hover {
+  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.6));
 }
 
 /* ===== ANIMATED DOT GRID ===== */

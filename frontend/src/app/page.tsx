@@ -3,6 +3,16 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+function LogoMark({ className = "" }: { className?: string }) {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className={`logo-mark ${className}`}>
+      <path d="M8 16 L16 8 L24 16 L16 24 Z" fill="white" opacity="0.9"/>
+      <path d="M4 16 L16 4 L28 16 L16 28" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4"/>
+      <circle cx="16" cy="16" r="2.5" fill="#2563eb"/>
+    </svg>
+  );
+}
+
 const suggestions = [
   "Todo app",
   "SaaS dashboard",
@@ -98,18 +108,18 @@ export default function LandingPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-[#2563eb] text-xl">⬡</span>
-            <span className="text-[#f0f4ff] font-semibold">corefront</span>
+          <Link href="/" className="flex items-center gap-3">
+            <LogoMark />
+            <span className="font-logo text-white text-xl">corefront</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <Link href="#" className="text-[#7c8db5] hover:text-[#f0f4ff] text-sm transition-colors">Product</Link>
-            <Link href="#" className="text-[#7c8db5] hover:text-[#f0f4ff] text-sm transition-colors">Docs</Link>
-            <Link href="#pricing" className="text-[#7c8db5] hover:text-[#f0f4ff] text-sm transition-colors">Pricing</Link>
-            <Link href="#" className="text-[#7c8db5] hover:text-[#f0f4ff] text-sm transition-colors">Blog</Link>
+            <Link href="#" className="text-[#c8d4f0] hover:text-white text-sm transition-colors">Product</Link>
+            <Link href="#" className="text-[#c8d4f0] hover:text-white text-sm transition-colors">Docs</Link>
+            <Link href="#pricing" className="text-[#c8d4f0] hover:text-white text-sm transition-colors">Pricing</Link>
+            <Link href="#" className="text-[#c8d4f0] hover:text-white text-sm transition-colors">Blog</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="btn btn-ghost text-sm">Sign in</Link>
+            <Link href="/login" className="text-[#c8d4f0] hover:text-white text-sm transition-colors">Sign in</Link>
             <Link href="/register" className="btn btn-primary text-sm py-2 px-4">
               Start building
               <span>→</span>
@@ -124,13 +134,13 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-glow-blue pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[80px] text-[#f0f4ff] leading-[1.1] mb-6">
+          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[80px] text-white font-bold leading-[1.1] mb-6">
             Ship full-stack apps
             <br />
             at the speed of thought.
           </h1>
 
-          <p className="text-[#7c8db5] text-lg md:text-xl max-w-[560px] mx-auto mb-10">
+          <p className="text-[#c8d4f0] text-lg md:text-xl max-w-[560px] mx-auto mb-10">
             Describe what you want to build. Corefront generates the architecture,
             components, and APIs — powered by Claude AI.
           </p>
@@ -161,7 +171,7 @@ export default function LandingPage() {
               <button
                 key={s}
                 onClick={() => setPrompt(`Build a ${s.toLowerCase()}`)}
-                className="px-3 py-1.5 text-sm text-[#2563eb] border border-[#2563eb]/30 rounded-full hover:bg-[#2563eb]/10 hover:border-[#2563eb]/50 transition-all"
+                className="px-3 py-1.5 text-sm text-[#c8d4f0] border border-[#1e2d4a] rounded-full hover:bg-[#2563eb]/10 hover:border-[#2563eb]/50 hover:text-white transition-all"
               >
                 → {s}
               </button>
@@ -260,7 +270,7 @@ export default function LandingPage() {
                 <div key={step.num} className="card p-6 border-l-gradient">
                   <span className="text-gradient font-mono text-sm mb-3 block">{step.num}</span>
                   <h3 className="text-[#f0f4ff] font-semibold text-lg mb-2">{step.title}</h3>
-                  <p className="text-[#7c8db5] text-sm">{step.desc}</p>
+                  <p className="text-[#c8d4f0] text-sm">{step.desc}</p>
                 </div>
               ))}
             </div>
@@ -293,7 +303,7 @@ export default function LandingPage() {
           <h2 className="font-display text-3xl md:text-4xl text-[#f0f4ff] text-center mb-4">
             Simple pricing
           </h2>
-          <p className="text-[#7c8db5] text-center mb-16 max-w-md mx-auto">
+          <p className="text-[#c8d4f0] text-center mb-16 max-w-md mx-auto">
             Start free, upgrade when you need more power.
           </p>
           <div className="grid md:grid-cols-3 gap-6">
@@ -310,7 +320,7 @@ export default function LandingPage() {
                 </div>
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-[#7c8db5]">
+                    <li key={f} className="flex items-center gap-2 text-sm text-[#c8d4f0]">
                       <span className="text-[#2563eb]">✓</span>
                       {f}
                     </li>
@@ -331,10 +341,10 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="py-24 px-6 bg-[#0a0f1e]">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="font-display text-3xl md:text-4xl text-[#f0f4ff] mb-4">
+          <h2 className="font-display text-3xl md:text-4xl text-white mb-4">
             Ready to build?
           </h2>
-          <p className="text-[#7c8db5] mb-8">
+          <p className="text-[#c8d4f0] mb-8">
             Join thousands of developers shipping faster with AI.
           </p>
           <Link href="/register" className="btn btn-primary text-base py-3 px-8">
@@ -346,18 +356,18 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="border-t border-[#1e2d4a] py-12 px-6 bg-[#070b14]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-[#2563eb] text-xl">⬡</span>
-            <span className="text-[#7c8db5] text-sm">
-              corefront — Build apps at the speed of thought.
+          <div className="flex items-center gap-3">
+            <LogoMark className="w-6 h-6" />
+            <span className="text-[#c8d4f0] text-sm">
+              <span className="font-logo text-white">corefront</span> — Build apps at the speed of thought.
             </span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-[#3a4a6b] hover:text-[#7c8db5] text-sm transition-colors">Twitter</Link>
-            <Link href="#" className="text-[#3a4a6b] hover:text-[#7c8db5] text-sm transition-colors">GitHub</Link>
-            <Link href="#" className="text-[#3a4a6b] hover:text-[#7c8db5] text-sm transition-colors">Discord</Link>
+            <Link href="#" className="text-[#7c8db5] hover:text-white text-sm transition-colors">Twitter</Link>
+            <Link href="#" className="text-[#7c8db5] hover:text-white text-sm transition-colors">GitHub</Link>
+            <Link href="#" className="text-[#7c8db5] hover:text-white text-sm transition-colors">Discord</Link>
             <span className="text-[#1e2d4a]">|</span>
-            <span className="text-[#3a4a6b] text-sm flex items-center gap-1">
+            <span className="text-[#7c8db5] text-sm flex items-center gap-1">
               Built with <span className="text-[#2563eb]">Claude AI</span>
             </span>
           </div>

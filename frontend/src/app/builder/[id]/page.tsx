@@ -7,6 +7,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import type { Project } from "@/types";
 
+function LogoMark({ className = "" }: { className?: string }) {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className={`logo-mark ${className}`}>
+      <path d="M8 16 L16 8 L24 16 L16 24 Z" fill="white" opacity="0.9"/>
+      <path d="M4 16 L16 4 L28 16 L16 28" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4"/>
+      <circle cx="16" cy="16" r="2.5" fill="#2563eb"/>
+    </svg>
+  );
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -136,7 +146,9 @@ export default function BuilderPage() {
       {/* Top bar - 48px */}
       <header className="h-12 border-b border-[#1e2d4a] flex items-center justify-between px-4 shrink-0 bg-[#070b14]">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-[#2563eb] text-lg">⬡</Link>
+          <Link href="/dashboard">
+            <LogoMark className="w-6 h-6" />
+          </Link>
           <span className="text-[#1e2d4a]">/</span>
           <span className="text-[#f0f4ff] text-sm font-medium">{project?.name || "New Project"}</span>
           {project && (
@@ -169,7 +181,7 @@ export default function BuilderPage() {
             {messages.length === 0 ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-[#3a4a6b] text-sm">Start a conversation</div>
+                  <div className="text-[#7c8db5] text-sm">Start a conversation</div>
                 </div>
               </div>
             ) : (
