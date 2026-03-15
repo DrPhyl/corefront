@@ -1,209 +1,195 @@
-"use client";
+'use client'
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/lib/api";
-import type { Project } from "@/types";
+import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
 
-function LogoMark({ className = "" }: { className?: string }) {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className={`logo-mark ${className}`}>
-      <path d="M8 16 L16 8 L24 16 L16 24 Z" fill="white" opacity="0.9"/>
-      <path d="M4 16 L16 4 L28 16 L16 28" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4"/>
-      <circle cx="16" cy="16" r="2.5" fill="#2563eb"/>
-    </svg>
-  );
+interface Project {
+  id: number
+  name: string
+  prompt: string
+  framework: string
+  status: string
+  generated_code: string | null
 }
 
 interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
+  role: 'user' | 'ai'
+  content: string
+  timestamp: Date
+}
+
+interface FileNode {
+  name: string
+  content: string
+  language: string
+}
+
+function parseFiles(raw: string): FileNode[] {
+  if (!raw) return []
+  const files: FileNode[] = []
+  const regex = /```(\w+)?\s*\/\/\s*([^\n]+)\n([\s\S]*?)```/g
+  let match
+  while ((match = regex.exec(raw)) !== null) {
+    files.push({ language: match[1] || 'text', name: match[2].trim(), content: match[3].trim() })
+  }
+  if (files.length === 0 && raw.length > 0) {
+    files.push({ name: 'output.txt', content: raw, language: 'text' })
+  }
+  return files
+}
+
+function getLangColor(lang: string): string {
+  const c: Record<string, string> = { tsx: '#61dafb', ts: '#3178c6', jsx: '#61dafb', js: '#f7df1e', py: '#3572A5', python: '#3572A5', css: '#563d7c', html: '#e34c26' }
+  return c[lang] || '#94a3b8'
 }
 
 export default function BuilderPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-  const params = useParams();
-  const projectId = params.id as string;
-
-  const [project, setProject] = useState<Project | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [prompt, setPrompt] = useState("");
-  const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<"preview" | "code" | "files">("code");
-  const [splitPosition, setSplitPosition] = useState(40);
-  const [isDragging, setIsDragging] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { id } = useParams<{ id: string }>()
+  const router = useRouter()
+  const [project, setProject] = useState<Project | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [prompt, setPrompt] = useState('')
+  const [generating, setGenerating] = useState(false)
+  const [files, setFiles] = useState<FileNode[]>([])
+  const [selectedFile, setSelectedFile] = useState<FileNode | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
+    const token = localStorage.getItem('token')
+    if (!token) { router.push('/login'); return }
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then((p: Project) => {
+        setProject(p)
+        if (p.generated_code) {
+          const parsed = parseFiles(p.generated_code)
+          setFiles(parsed)
+          if (parsed.length > 0) setSelectedFile(parsed[0])
+          setMessages([
+            { role: 'user', content: p.prompt, timestamp: new Date() },
+            { role: 'ai', content: p.generated_code, timestamp: new Date() },
+          ])
+        } else {
+          setMessages([{ role: 'user', content: p.prompt, timestamp: new Date() }])
+        }
+      })
+      .catch(() => router.push('/dashboard'))
+      .finally(() => setLoading(false))
+  }, [id])
 
-  useEffect(() => {
-    if (user && projectId !== "new") {
-      loadProject();
-    }
-  }, [user, projectId]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const loadProject = async () => {
+  const handleGenerate = async () => {
+    if (!prompt.trim() || generating) return
+    const token = localStorage.getItem('token')
+    setMessages(prev => [...prev, { role: 'user', content: prompt, timestamp: new Date() }])
+    setPrompt('')
+    setGenerating(true)
     try {
-      const data = await api.getProject(Number(projectId));
-      setProject(data);
-      if (data.prompt) {
-        setMessages([
-          {
-            id: "1",
-            role: "user",
-            content: data.prompt,
-            timestamp: new Date(data.created_at),
-          },
-          {
-            id: "2",
-            role: "assistant",
-            content: `Generated your ${data.framework} application. Check the Code tab to see the output.`,
-            timestamp: new Date(data.updated_at),
-          },
-        ]);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ project_id: Number(id), prompt }),
+      })
+      if (res.status === 402) {
+        setMessages(prev => [...prev, { role: 'ai', content: '⚠ Free plan limit reached. Upgrade to Pro to continue.', timestamp: new Date() }])
+        return
       }
-    } catch (err) {
-      console.error("Failed to load project:", err);
-    }
-  };
-
-  const handleSend = async () => {
-    if (!prompt.trim() || generating) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: prompt,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setPrompt("");
-    setGenerating(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Updated the code based on your feedback. Check the Code tab.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      const data = await res.json()
+      const code = data.generated_code || data.code || JSON.stringify(data)
+      const parsed = parseFiles(code)
+      setFiles(parsed)
+      if (parsed.length > 0) setSelectedFile(parsed[0])
+      setMessages(prev => [...prev, { role: 'ai', content: code, timestamp: new Date() }])
+    } catch {
+      setMessages(prev => [...prev, { role: 'ai', content: '⚠ Generation failed. Please try again.', timestamp: new Date() }])
     } finally {
-      setGenerating(false);
+      setGenerating(false)
     }
-  };
-
-  const handleMouseDown = () => setIsDragging(true);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const newPosition = ((e.clientX - rect.left) / rect.width) * 100;
-    setSplitPosition(Math.max(25, Math.min(75, newPosition)));
-  };
-
-  const handleMouseUp = () => setIsDragging(false);
-
-  const copyCode = () => {
-    if (project?.generated_code) {
-      navigator.clipboard.writeText(project.generated_code);
-    }
-  };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#070b14]">
-        <div className="w-6 h-6 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
   }
 
-  if (!user) return null;
+  const handleCopy = () => {
+    if (!selectedFile) return
+    navigator.clipboard.writeText(selectedFile.content)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleDownload = () => {
+    const content = files.map(f => `// ${f.name}\n${f.content}`).join('\n\n---\n\n')
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${project?.name || 'project'}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#070b14', color: '#475569', fontSize: 14 }}>
+      Loading...
+    </div>
+  )
 
   return (
-    <div
-      ref={containerRef}
-      className="h-screen bg-[#070b14] flex flex-col overflow-hidden"
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      {/* Top bar - 48px */}
-      <header className="h-12 border-b border-[#1e2d4a] flex items-center justify-between px-4 shrink-0 bg-[#070b14]">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <LogoMark className="w-6 h-6" />
-          </Link>
-          <span className="text-[#1e2d4a]">/</span>
-          <span className="text-[#f0f4ff] text-sm font-medium">{project?.name || "New Project"}</span>
-          {project && (
-            <span className="text-[#3a4a6b] text-xs uppercase tracking-wider">{project.framework}</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="btn btn-ghost text-sm py-1.5 px-3">Share</button>
-          <button className="btn btn-primary text-sm py-1.5 px-3">Deploy</button>
-        </div>
-      </header>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #070b14; overflow: hidden; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        pre { margin:0; white-space:pre-wrap; word-break:break-word; }
+        ::-webkit-scrollbar { width:5px; height:5px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:99px; }
+      `}</style>
 
-      {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left panel - Chat */}
-        <div
-          className="flex flex-col bg-[#0a0f1e] border-r border-[#1e2d4a]"
-          style={{ width: `${splitPosition}%` }}
-        >
-          {/* Model selector */}
-          <div className="h-10 border-b border-[#1e2d4a] flex items-center px-4 bg-[#070b14]">
-            <select className="bg-transparent text-[#7c8db5] text-sm focus:outline-none cursor-pointer">
-              <option>GPT-4o</option>
-              <option>Gemini Pro</option>
-            </select>
+      <div style={{ display:'flex', height:'100vh', background:'#070b14', fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+
+        {/* LEFT: Chat */}
+        <div style={{ width:380, minWidth:380, height:'100vh', background:'#0a0f1e', borderRight:'1px solid rgba(255,255,255,0.05)', display:'flex', flexDirection:'column' }}>
+
+          {/* Header */}
+          <div style={{ padding:'16px 20px', borderBottom:'1px solid rgba(255,255,255,0.05)', display:'flex', alignItems:'center', gap:12 }}>
+            <Link href="/dashboard" style={{ color:'#475569', textDecoration:'none', fontSize:18, lineHeight:1 }}>←</Link>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:14, fontWeight:600, color:'#f1f5f9', fontFamily:'"Instrument Serif",Georgia,serif', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                {project?.name || 'Builder'}
+              </div>
+              <div style={{ fontSize:11, color:'#334155', marginTop:2 }}>
+                {project?.framework} · {files.length} file{files.length !== 1 ? 's' : ''}
+              </div>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-auto p-4 space-y-4">
-            {messages.length === 0 ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-[#7c8db5] text-sm">Start a conversation</div>
+          <div style={{ flex:1, overflowY:'auto', padding:'16px 20px', display:'flex', flexDirection:'column', gap:12 }}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{ display:'flex', flexDirection:'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{
+                  maxWidth:'85%', padding:'10px 14px',
+                  borderRadius: msg.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
+                  background: msg.role === 'user' ? 'rgba(37,99,235,0.2)' : '#0d1427',
+                  border:`1px solid ${msg.role === 'user' ? 'rgba(37,99,235,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                  fontSize:13, color:'#cbd5e1', lineHeight:1.55, wordBreak:'break-word',
+                }}>
+                  {msg.role === 'ai' && msg.content.includes('```')
+                    ? <span style={{ color:'#64748b', fontStyle:'italic' }}>✓ Generated {files.length} file{files.length !== 1 ? 's' : ''} — see code panel →</span>
+                    : msg.content.slice(0, 300) + (msg.content.length > 300 ? '...' : '')}
                 </div>
               </div>
-            ) : (
-              messages.map((message) => (
-                <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] rounded-lg px-4 py-2.5 ${
-                    message.role === "user"
-                      ? "bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white"
-                      : "bg-[#0d1427] text-[#f0f4ff] border border-[#1e2d4a]"
-                  }`}>
-                    <p className="text-sm">{message.content}</p>
-                  </div>
-                </div>
-              ))
-            )}
+            ))}
             {generating && (
-              <div className="flex justify-start">
-                <div className="bg-[#0d1427] border border-[#1e2d4a] rounded-lg px-4 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-[#2563eb] rounded-full animate-pulse" />
-                    <span className="text-[#7c8db5] text-sm">Generating...</span>
-                  </div>
+              <div style={{ display:'flex' }}>
+                <div style={{ padding:'10px 14px', borderRadius:'12px 12px 12px 4px', background:'#0d1427', border:'1px solid rgba(255,255,255,0.06)', display:'flex', gap:4, alignItems:'center' }}>
+                  {[0,1,2].map(i => <div key={i} style={{ width:6, height:6, borderRadius:'50%', background:'#2563eb', animation:`blink 1.2s ease-in-out ${i*0.2}s infinite` }} />)}
                 </div>
               </div>
             )}
@@ -211,120 +197,92 @@ export default function BuilderPage() {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t border-[#1e2d4a] bg-[#070b14]">
-            <div className="relative">
+          <div style={{ padding:'16px 20px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ background:'#0d1427', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, padding:'12px 14px', display:'flex', flexDirection:'column', gap:10 }}>
               <textarea
                 value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                placeholder="Ask to modify the code..."
-                rows={2}
-                className="w-full px-4 py-3 bg-[#0d1427] border border-[#1e2d4a] rounded-lg text-[#f0f4ff] placeholder-[#3a4a6b] text-sm focus:outline-none focus:border-[#2563eb] resize-none pr-12"
+                onChange={e => setPrompt(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate() }}
+                placeholder="Describe what to build or change..."
+                rows={3}
+                style={{ background:'transparent', border:'none', outline:'none', color:'#e2e8f0', fontSize:13, lineHeight:1.55, resize:'none', fontFamily:'inherit', width:'100%' }}
               />
-              <button
-                onClick={handleSend}
-                disabled={!prompt.trim() || generating}
-                className="absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center rounded-md bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <span style={{ fontSize:11, color:'#334155' }}>⌘↵ to generate</span>
+                <button onClick={handleGenerate} disabled={!prompt.trim() || generating} style={{
+                  background: prompt.trim() && !generating ? 'linear-gradient(135deg,#2563eb,#7c3aed)' : 'rgba(255,255,255,0.06)',
+                  color: prompt.trim() && !generating ? '#fff' : '#334155',
+                  border:'none', borderRadius:8, padding:'7px 16px', fontSize:13, fontWeight:600,
+                  cursor: prompt.trim() && !generating ? 'pointer' : 'not-allowed',
+                  display:'flex', alignItems:'center', gap:6,
+                }}>
+                  {generating
+                    ? <><div style={{ width:12, height:12, border:'2px solid rgba(255,255,255,0.3)', borderTopColor:'#fff', borderRadius:'50%', animation:'spin 0.7s linear infinite' }} /> Generating...</>
+                    : 'Generate →'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Resizer */}
-        <div
-          className="w-px bg-[#2563eb] cursor-col-resize hover:w-0.5 transition-all"
-          onMouseDown={handleMouseDown}
-        />
+        {/* RIGHT: Code */}
+        <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
 
-        {/* Right panel - Code */}
-        <div className="flex-1 flex flex-col bg-[#070b14]">
-          {/* Tab bar */}
-          <div className="h-10 border-b border-[#1e2d4a] flex items-center px-4 gap-1">
-            {(["preview", "code", "files"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`relative px-3 py-1.5 text-sm rounded transition-colors ${
-                  activeTab === tab
-                    ? "text-[#f0f4ff]"
-                    : "text-[#3a4a6b] hover:text-[#7c8db5]"
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                {activeTab === tab && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#2563eb] to-[#7c3aed]" />
-                )}
+          {/* Top bar */}
+          <div style={{ padding:'12px 20px', borderBottom:'1px solid rgba(255,255,255,0.05)', display:'flex', alignItems:'center', gap:12, background:'#0a0f1e', flexShrink:0 }}>
+            <div style={{ display:'flex', gap:6 }}>
+              {['#ef4444','#f59e0b','#22c55e'].map(c => <div key={c} style={{ width:12, height:12, borderRadius:'50%', background:c, opacity:0.7 }} />)}
+            </div>
+            <span style={{ fontSize:13, color:'#475569', flex:1, fontFamily:'monospace' }}>{selectedFile?.name || 'No file selected'}</span>
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={handleCopy} disabled={!selectedFile} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:7, padding:'5px 12px', color: copied ? '#22c55e' : '#64748b', fontSize:12, cursor: selectedFile ? 'pointer' : 'not-allowed' }}>
+                {copied ? '✓ Copied' : 'Copy'}
               </button>
-            ))}
-            <div className="flex-1" />
-            {activeTab === "code" && (
-              <button onClick={copyCode} className="text-[#3a4a6b] hover:text-[#7c8db5] text-sm transition-colors">
-                Copy
+              <button onClick={handleDownload} disabled={files.length === 0} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:7, padding:'5px 12px', color:'#64748b', fontSize:12, cursor: files.length > 0 ? 'pointer' : 'not-allowed' }}>
+                Download all
               </button>
-            )}
+            </div>
           </div>
 
-          {/* Tab content */}
-          <div className="flex-1 overflow-auto">
-            {activeTab === "preview" && (
-              <div className="h-full flex items-center justify-center text-[#3a4a6b] text-sm">
-                Preview coming soon
+          <div style={{ flex:1, display:'flex', overflow:'hidden' }}>
+
+            {/* File tree */}
+            {files.length > 0 && (
+              <div style={{ width:200, borderRight:'1px solid rgba(255,255,255,0.05)', overflowY:'auto', padding:'12px 0', background:'#0a0f1e', flexShrink:0 }}>
+                <div style={{ padding:'4px 16px 8px', fontSize:10, fontWeight:600, color:'#334155', textTransform:'uppercase', letterSpacing:'0.08em' }}>Files</div>
+                {files.map((f, i) => (
+                  <button key={i} onClick={() => setSelectedFile(f)} style={{
+                    display:'flex', alignItems:'center', gap:8, width:'100%', padding:'7px 16px',
+                    border:'none', textAlign:'left', cursor:'pointer', fontFamily:'monospace',
+                    background: selectedFile?.name === f.name ? 'rgba(37,99,235,0.12)' : 'transparent',
+                    borderLeft:`2px solid ${selectedFile?.name === f.name ? '#2563eb' : 'transparent'}`,
+                    color: selectedFile?.name === f.name ? '#e2e8f0' : '#64748b',
+                    fontSize:12, transition:'all 0.15s',
+                  }}>
+                    <span style={{ width:8, height:8, borderRadius:'50%', background:getLangColor(f.language), flexShrink:0 }} />
+                    <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.name}</span>
+                  </button>
+                ))}
               </div>
             )}
 
-            {activeTab === "code" && (
-              <div className="h-full font-mono text-sm">
-                {project?.generated_code ? (
-                  <pre className="p-4 overflow-auto h-full">
-                    <code>
-                      {project.generated_code.split("\n").map((line, i) => (
-                        <div key={i} className="flex">
-                          <span className="w-12 text-right pr-4 text-[#1e2d4a] select-none">{i + 1}</span>
-                          <span className="text-[#f0f4ff]">{line || " "}</span>
-                        </div>
-                      ))}
-                    </code>
-                  </pre>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-[#3a4a6b]">
-                    No code generated yet
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "files" && (
-              <div className="p-4">
-                <div className="text-[#3a4a6b] text-sm">
-                  {project ? (
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-[#7c8db5]">
-                        <span>📄</span>
-                        <span>App.tsx</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-[#7c8db5]">
-                        <span>📄</span>
-                        <span>index.css</span>
-                      </div>
-                    </div>
-                  ) : (
-                    "No files yet"
-                  )}
+            {/* Code viewer */}
+            <div style={{ flex:1, overflowY:'auto', padding:'20px 24px', background:'#070b14' }}>
+              {selectedFile ? (
+                <pre style={{ fontSize:13, color:'#cbd5e1', lineHeight:1.7, fontFamily:'"Fira Code","Cascadia Code",monospace' }}>
+                  {selectedFile.content}
+                </pre>
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', color:'#334155', textAlign:'center', gap:12 }}>
+                  <div style={{ fontSize:40 }}>⌨</div>
+                  <div style={{ fontSize:15, fontWeight:500, color:'#475569' }}>Ready to generate</div>
+                  <div style={{ fontSize:13, color:'#334155', maxWidth:280, lineHeight:1.6 }}>Type a prompt in the chat panel and click Generate.</div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </>
+  )
 }
