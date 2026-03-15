@@ -49,8 +49,8 @@ function NewProjectContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
-        <div className="w-6 h-6 border-2 border-[#f97316] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#070b14]">
+        <div className="w-6 h-6 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -64,13 +64,13 @@ function NewProjectContent() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070b14] flex flex-col">
       {/* Top bar */}
-      <header className="h-12 border-b border-[#27272a] flex items-center px-4">
+      <header className="h-12 border-b border-[#1e2d4a] flex items-center px-4">
         <Link href="/dashboard" className="flex items-center gap-4">
-          <span className="text-gradient text-lg font-bold">⬡</span>
-          <span className="text-[#3f3f46]">/</span>
-          <span className="text-[#fafafa] text-sm">New Project</span>
+          <span className="text-[#2563eb] text-lg">⬡</span>
+          <span className="text-[#1e2d4a]">/</span>
+          <span className="text-[#f0f4ff] text-sm">New Project</span>
         </Link>
       </header>
 
@@ -78,8 +78,8 @@ function NewProjectContent() {
       <main className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-lg">
           <div className="text-center mb-8">
-            <h1 className="text-[#fafafa] text-2xl font-semibold mb-2">Create new project</h1>
-            <p className="text-[#52525b] text-sm">Describe what you want to build</p>
+            <h1 className="text-[#f0f4ff] text-2xl font-semibold mb-2">Create new project</h1>
+            <p className="text-[#3a4a6b] text-sm">Describe what you want to build</p>
           </div>
 
           {error && (
@@ -91,7 +91,7 @@ function NewProjectContent() {
           <div className="space-y-6">
             {/* Project name */}
             <div>
-              <label className="block text-[#a1a1aa] text-sm mb-2">Project name</label>
+              <label className="block text-[#7c8db5] text-sm mb-2">Project name</label>
               <input
                 type="text"
                 value={name}
@@ -103,7 +103,7 @@ function NewProjectContent() {
 
             {/* Framework */}
             <div>
-              <label className="block text-[#a1a1aa] text-sm mb-2">Framework</label>
+              <label className="block text-[#7c8db5] text-sm mb-2">Framework</label>
               <div className="grid grid-cols-3 gap-3">
                 {frameworks.map((fw) => (
                   <button
@@ -111,8 +111,8 @@ function NewProjectContent() {
                     onClick={() => setFramework(fw.id)}
                     className={`p-4 rounded-lg border transition-all text-center ${
                       framework === fw.id
-                        ? "border-gradient bg-[#18181b]"
-                        : "bg-[#18181b] border-[#27272a] hover:border-[#3f3f46]"
+                        ? "border-[#2563eb] bg-[#0d1427]"
+                        : "border-[#1e2d4a] bg-[#0d1427] hover:border-[#2a4070]"
                     }`}
                   >
                     <div className={`text-sm font-medium ${fw.color}`}>{fw.name}</div>
@@ -123,7 +123,7 @@ function NewProjectContent() {
 
             {/* Prompt */}
             <div>
-              <label className="block text-[#a1a1aa] text-sm mb-2">Description</label>
+              <label className="block text-[#7c8db5] text-sm mb-2">Description</label>
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -158,8 +158,8 @@ function NewProjectContent() {
 export default function NewProjectPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
-        <div className="w-6 h-6 border-2 border-[#f97316] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#070b14]">
+        <div className="w-6 h-6 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin" />
       </div>
     }>
       <NewProjectContent />

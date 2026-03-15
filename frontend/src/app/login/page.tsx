@@ -26,21 +26,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090b] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#070b14] p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-gradient text-3xl font-bold glow-accent-text">⬡</span>
-            <span className="text-[#fafafa] font-semibold text-lg">corefront</span>
+            <span className="text-[#2563eb] text-3xl glow-blue-text">⬡</span>
+            <span className="text-[#f0f4ff] font-semibold text-lg">corefront</span>
           </Link>
         </div>
 
         {/* Card */}
-        <div className="bg-[#111113] border border-[#27272a] rounded-xl p-8">
+        <div className="bg-[#0d1427] border border-[#1e2d4a] rounded-xl p-8">
           <div className="text-center mb-6">
-            <h1 className="text-[#fafafa] text-xl font-semibold mb-1">Welcome back</h1>
-            <p className="text-[#52525b] text-sm">Sign in to your account</p>
+            <h1 className="text-[#f0f4ff] text-xl font-semibold mb-1">Welcome back</h1>
+            <p className="text-[#3a4a6b] text-sm">Sign in to your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -51,7 +51,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-[#a1a1aa] text-sm mb-2">
+              <label htmlFor="email" className="block text-[#7c8db5] text-sm mb-2">
                 Email
               </label>
               <input
@@ -66,7 +66,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-[#a1a1aa] text-sm mb-2">
+              <label htmlFor="password" className="block text-[#7c8db5] text-sm mb-2">
                 Password
               </label>
               <input
@@ -97,9 +97,9 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-[#52525b] text-sm">
+            <p className="text-[#3a4a6b] text-sm">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-[#f97316] hover:text-[#ec4899] transition-colors">
+              <Link href="/register" className="text-[#2563eb] hover:text-[#60a5fa] transition-colors">
                 Sign up
               </Link>
             </p>
