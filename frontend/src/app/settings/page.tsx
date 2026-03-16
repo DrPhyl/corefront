@@ -34,6 +34,7 @@ function SettingsContent() {
   const [newPw, setNewPw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
   const [pwError, setPwError] = useState('')
+  const showSuccess = searchParams.get('success') === 'true'
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
@@ -112,6 +113,12 @@ function SettingsContent() {
           <h1 style={{ margin: '0 0 6px', fontSize: 28, fontWeight: 700, fontFamily: '"Instrument Serif",Georgia,serif', color: '#f8fafc' }}>Settings</h1>
           <p style={{ margin: 0, fontSize: 14, color: '#475569' }}>Manage your account and billing</p>
         </div>
+
+        {showSuccess && (
+          <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '14px 18px', marginBottom: 24, fontSize: 14, color: '#22c55e' }}>
+            ✓ Your plan has been upgraded successfully!
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 4, marginBottom: 32, background: '#0d1427', padding: 4, borderRadius: 10, width: 'fit-content', border: '1px solid rgba(255,255,255,0.06)' }}>
           {TABS.map(t => (
@@ -202,7 +209,18 @@ function SettingsContent() {
                 </>
               )}
               {user?.plan !== 'free' && (
-                <button style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 20px', color: '#94a3b8', fontSize: 14, cursor: 'pointer', marginTop: 8 }}>
+                <button
+                  onClick={async () => {
+                    const token = localStorage.getItem('access_token')
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/stripe/portal/`, {
+                      method: 'POST',
+                      headers: { Authorization: `Bearer ${token}` },
+                    })
+                    const data = await res.json()
+                    if (data.portal_url) window.location.href = data.portal_url
+                  }}
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '10px 20px', color: '#94a3b8', fontSize: 14, cursor: 'pointer', marginTop: 8 }}
+                >
                   Manage billing →
                 </button>
               )}
@@ -211,8 +229,8 @@ function SettingsContent() {
             {user?.plan === 'free' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 {[
-                  { name: 'Pro', price: '$29', color: '#7c3aed', border: 'rgba(124,58,237,0.3)', features: ['Unlimited generations','All frameworks','Private projects','API access','Priority support'] },
-                  { name: 'Team', price: '$99', color: '#2563eb', border: 'rgba(37,99,235,0.3)', features: ['Everything in Pro','Team collaboration','SSO & SAML','Dedicated support','Custom integrations'] },
+                  { name: 'Pro', price: '$29', plan: 'pro', color: '#7c3aed', border: 'rgba(124,58,237,0.3)', features: ['Unlimited generations','All frameworks','Private projects','API access','Priority support'] },
+                  { name: 'Team', price: '$59', plan: 'team', color: '#2563eb', border: 'rgba(37,99,235,0.3)', features: ['Everything in Pro','Team collaboration','SSO & SAML','Dedicated support','Custom integrations'] },
                 ].map(p => (
                   <div key={p.name} style={{ background: '#0d1427', border: `1px solid ${p.border}`, borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div>
@@ -229,7 +247,19 @@ function SettingsContent() {
                         </div>
                       ))}
                     </div>
-                    <button style={{ background: `linear-gradient(135deg,${p.color},${p.color}dd)`, color: '#fff', border: 'none', borderRadius: 9, padding: 11, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 'auto' }}>
+                    <button
+                      onClick={async () => {
+                        const token = localStorage.getItem('access_token')
+                        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/stripe/checkout/`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ plan: p.plan }),
+                        })
+                        const data = await res.json()
+                        if (data.checkout_url) window.location.href = data.checkout_url
+                      }}
+                      style={{ background: `linear-gradient(135deg,${p.color},${p.color}dd)`, color: '#fff', border: 'none', borderRadius: 9, padding: 11, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 'auto' }}
+                    >
                       Upgrade to {p.name} →
                     </button>
                   </div>
