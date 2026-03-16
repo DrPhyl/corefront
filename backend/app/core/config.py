@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: str = "http://localhost:3000,https://corefront.ai,https://selfless-tenderness-production.up.railway.app"
 
+    # Stripe
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_PRO_PRICE_ID: str = ""
+    STRIPE_TEAM_PRICE_ID: str = ""
+    FRONTEND_URL: str = "https://selfless-tenderness-production.up.railway.app"
+
 
 @lru_cache()
 def get_settings() -> Settings:
