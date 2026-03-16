@@ -21,7 +21,12 @@ class UserMe(BaseModel):
 
 @router.get("/me", response_model=UserMe)
 def get_me(current_user: User = Depends(get_current_user)):
-    generations_limit = 5 if current_user.plan == "free" else -1
+    if current_user.plan == "free":
+        generations_limit = 5
+    elif current_user.plan == "pro":
+        generations_limit = 59
+    else:
+        generations_limit = 250
     return UserMe(
         id=current_user.id,
         email=current_user.email,

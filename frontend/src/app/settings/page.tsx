@@ -229,8 +229,8 @@ function SettingsContent() {
             {user?.plan === 'free' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 {[
-                  { name: 'Pro', price: '$29', plan: 'pro', color: '#7c3aed', border: 'rgba(124,58,237,0.3)', features: ['Unlimited generations','All frameworks','Private projects','API access','Priority support'] },
-                  { name: 'Team', price: '$59', plan: 'team', color: '#2563eb', border: 'rgba(37,99,235,0.3)', features: ['Everything in Pro','Team collaboration','SSO & SAML','Dedicated support','Custom integrations'] },
+                  { name: 'Pro', price: '$15', plan: 'pro', color: '#7c3aed', border: 'rgba(124,58,237,0.3)', features: ['59 generations/month','All frameworks','Private projects','API access','Priority support'] },
+                  { name: 'Team', price: '$59', plan: 'team', color: '#2563eb', border: 'rgba(37,99,235,0.3)', features: ['250 generations/month','Everything in Pro','Team collaboration','SSO & SAML','Dedicated support'] },
                 ].map(p => (
                   <div key={p.name} style={{ background: '#0d1427', border: `1px solid ${p.border}`, borderRadius: 14, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div>
