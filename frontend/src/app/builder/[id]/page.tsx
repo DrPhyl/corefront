@@ -73,25 +73,16 @@ export default function BuilderPage() {
       return
     }
 
+    // Fallback: wrap plain content in minimal HTML
     setPreviewHtml(`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>body{margin:0;padding:0;font-family:system-ui,sans-serif;}</style>
+  <style>body{margin:0;padding:16px;font-family:system-ui,sans-serif;}</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
-    ${source}
-    try {
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(React.createElement(typeof App !== 'undefined' ? App : () => React.createElement('div', null, 'Preview loaded')));
-    } catch(e) { document.body.innerHTML = '<pre style="padding:20px;color:red">' + e.message + '</pre>'; }
-  </script>
+  <pre>${source}</pre>
 </body>
 </html>`)
   }
@@ -354,7 +345,8 @@ export default function BuilderPage() {
                 <iframe
                   srcDoc={previewHtml}
                   style={{ width:'100%', height:'100%', border:'none' }}
-                  sandbox="allow-scripts allow-same-origin"
+                  sandbox="allow-scripts"
+                  referrerPolicy="no-referrer"
                   title="Preview"
                 />
               ) : (
