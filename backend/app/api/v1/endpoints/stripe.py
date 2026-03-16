@@ -59,7 +59,7 @@ def create_checkout(
             payment_method_types=["card"],
             line_items=[{"price": price_id, "quantity": 1}],
             mode="subscription",
-            success_url=f"{settings.FRONTEND_URL}/settings?tab=billing&success=true",
+            success_url=f"{settings.FRONTEND_URL}/dashboard?upgraded=true",
             cancel_url=f"{settings.FRONTEND_URL}/settings?tab=billing",
         )
         return {"checkout_url": session.url}
