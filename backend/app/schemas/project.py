@@ -25,6 +25,11 @@ class GenerateRequest(BaseModel):
     framework: Framework = Field(default=Framework.REACT, description="Target framework")
 
 
+class RegenerateRequest(BaseModel):
+    project_id: int
+    prompt: str
+
+
 class GenerateResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -117,12 +117,57 @@ Output format:
     return message.content[0].text
 
 
+def generate_nextjs_code(prompt: str) -> str:
+    if not settings.ANTHROPIC_API_KEY:
+        raise ValueError("ANTHROPIC_API_KEY is not configured")
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    system = """You are an expert Next.js developer. Generate complete, production-ready Next.js code.
+Guidelines:
+- Use Next.js 14 App Router with TypeScript
+- Use Tailwind CSS for styling
+- Make components responsive and accessible
+- Include proper file structure with comments showing filenames like: // app/page.tsx
+
+Output format: Return the complete code with each file clearly marked with its path as a comment."""
+    message = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=4096,
+        system=system,
+        messages=[{"role": "user", "content": f"Create a Next.js app for: {prompt}"}],
+    )
+    return message.content[0].text
+
+
+def generate_fastapi_code(prompt: str) -> str:
+    if not settings.ANTHROPIC_API_KEY:
+        raise ValueError("ANTHROPIC_API_KEY is not configured")
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    system = """You are an expert FastAPI developer. Generate complete, production-ready FastAPI code.
+Guidelines:
+- Use FastAPI with Python type hints
+- Include Pydantic models for request/response validation
+- Add proper error handling and status codes
+- Include SQLAlchemy models if database is needed
+- Mark each file clearly with its path as a comment like: # main.py
+
+Output format: Return the complete code with each file clearly marked."""
+    message = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=4096,
+        system=system,
+        messages=[{"role": "user", "content": f"Create a FastAPI app for: {prompt}"}],
+    )
+    return message.content[0].text
+
+
 def generate_code(prompt: str, framework: str = "react") -> str:
     """Generate code for the specified framework."""
     generators = {
         "react": generate_react_code,
         "vue": generate_vue_code,
         "svelte": generate_svelte_code,
+        "nextjs": generate_nextjs_code,
+        "fastapi": generate_fastapi_code,
     }
 
     generator = generators.get(framework.lower())

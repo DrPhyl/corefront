@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from app.api.deps import CurrentUser, DBSession
-from app.schemas.project import GenerateRequest, GenerateResponse, ProjectResponse
+from app.schemas.project import GenerateRequest, GenerateResponse, ProjectResponse, RegenerateRequest
 from app.services.project import (
     create_project,
     generate_project_code,
@@ -25,6 +25,25 @@ def generate_code(
     # Generate the code
     project = generate_project_code(db, project)
 
+    return project
+
+
+@router.post("/regenerate", response_model=GenerateResponse)
+def regenerate_code(
+    request: RegenerateRequest,
+    current_user: CurrentUser,
+    db: DBSession,
+):
+    """Regenerate code for an existing project with a new prompt."""
+    project = get_project_by_id(db, project_id=request.project_id, user_id=current_user.id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    project.prompt = request.prompt
+    db.commit()
+    project = generate_project_code(db, project)
     return project
 
 

@@ -91,7 +91,7 @@ export default function BuilderPage() {
     setPrompt('')
     setGenerating(true)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/generate`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/generate/regenerate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ project_id: Number(id), prompt }),
