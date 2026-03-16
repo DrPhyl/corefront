@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true)
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     if (!token) { router.push('/login'); return }
 
     const headers = { Authorization: `Bearer ${token}` }
@@ -74,7 +74,7 @@ export default function DashboardPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this project?')) return
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }

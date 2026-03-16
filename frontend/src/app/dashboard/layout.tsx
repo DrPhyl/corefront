@@ -28,7 +28,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     if (!token) { router.push('/login'); return }
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
+    localStorage.removeItem('access_token')
     router.push('/login')
   }
 

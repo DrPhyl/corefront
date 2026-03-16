@@ -36,7 +36,7 @@ function SettingsContent() {
   const [pwError, setPwError] = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     if (!token) { router.push('/login'); return }
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -47,7 +47,7 @@ function SettingsContent() {
   }, [])
 
   const handleSaveProfile = async () => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     setSaving(true)
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
@@ -66,7 +66,7 @@ function SettingsContent() {
     setPwError('')
     if (newPw !== confirmPw) { setPwError('Passwords do not match'); return }
     if (newPw.length < 8) { setPwError('Password must be at least 8 characters'); return }
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     setSaving(true)
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me/password`, {

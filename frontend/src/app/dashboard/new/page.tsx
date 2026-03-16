@@ -30,7 +30,7 @@ export default function NewProjectPage() {
 
   const handleCreate = async () => {
     if (!name.trim() || !prompt.trim()) { setError('Project name and description are required'); return }
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     setLoading(true)
     setError('')
     try {

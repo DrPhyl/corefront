@@ -58,7 +58,7 @@ export default function BuilderPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     if (!token) { router.push('/login'); return }
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -86,7 +86,7 @@ export default function BuilderPage() {
 
   const handleGenerate = async () => {
     if (!prompt.trim() || generating) return
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('access_token')
     setMessages(prev => [...prev, { role: 'user', content: prompt, timestamp: new Date() }])
     setPrompt('')
     setGenerating(true)
