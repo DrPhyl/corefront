@@ -57,39 +57,28 @@ export default function BuilderPage() {
   const [copied, setCopied] = useState(false)
   const [viewMode, setViewMode] = useState<'code' | 'preview'>('code')
   const [previewHtml, setPreviewHtml] = useState('')
+  const [rawCode, setRawCode] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const buildPreview = () => {
-    if (!files.length) return
+    const source = rawCode || (files.length > 0 ? files[0].content : '')
+    if (!source) return
 
-    // Find HTML file by extension or by content starting with <!DOCTYPE or <html
-    const htmlFile = files.find(f =>
-      f.name.endsWith('.html') ||
-      f.content.trimStart().startsWith('<!DOCTYPE') ||
-      f.content.trimStart().startsWith('<html')
-    )
-
-    if (htmlFile) {
-      setPreviewHtml(htmlFile.content)
+    if (source.includes('<!DOCTYPE') || source.includes('<html')) {
+      // Extract just the HTML part if wrapped in backticks
+      const htmlMatch = source.match(/(<!DOCTYPE[\s\S]*<\/html>)/i)
+      setPreviewHtml(htmlMatch ? htmlMatch[1] : source)
       return
     }
 
-    // Check if any file content looks like HTML
-    const anyHtml = files.find(f => f.content.includes('<body') || f.content.includes('<div'))
-    if (anyHtml) {
-      setPreviewHtml(anyHtml.content)
-      return
-    }
-
-    // Fall back to wrapping JSX/TSX in a React app
-    const tsxFile = files.find(f => ['tsx','jsx','ts','js'].includes(f.language) || f.name.match(/\.(tsx|jsx|ts|js)$/))
-    if (tsxFile) {
-      setPreviewHtml(`<!DOCTYPE html>
+    // Wrap in HTML shell
+    setPreviewHtml(`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{margin:0;padding:0;font-family:system-ui,sans-serif;}</style>
 </head>
 <body>
   <div id="root"></div>
@@ -97,13 +86,14 @@ export default function BuilderPage() {
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel">
-    ${tsxFile.content}
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(App || (() => <div>No default export found</div>)));
+    ${source}
+    try {
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(React.createElement(typeof App !== 'undefined' ? App : () => React.createElement('pre', null, 'Component loaded')));
+    } catch(e) { document.body.innerHTML = '<pre style="padding:20px;color:red">' + e.message + '</pre>'; }
   </script>
 </body>
 </html>`)
-    }
   }
 
   useEffect(() => {
@@ -116,10 +106,13 @@ export default function BuilderPage() {
       .then((p: Project) => {
         setProject(p)
         if (p.generated_code) {
+          setRawCode(p.generated_code)
           const parsed = parseFiles(p.generated_code)
           setFiles(parsed)
           if (parsed.length > 0) setSelectedFile(parsed[0])
-          setTimeout(() => buildPreview(), 0)
+          // Set preview directly from raw code
+          const htmlMatch = p.generated_code.match(/(<!DOCTYPE[\s\S]*<\/html>)/i)
+          if (htmlMatch) setPreviewHtml(htmlMatch[1])
           setMessages([
             { role: 'user', content: p.prompt, timestamp: new Date() },
             { role: 'ai', content: p.generated_code, timestamp: new Date() },
@@ -152,11 +145,18 @@ export default function BuilderPage() {
       }
       const data = await res.json()
       const code = data.generated_code || data.code || JSON.stringify(data)
+      setRawCode(code)
       const parsed = parseFiles(code)
       setFiles(parsed)
       if (parsed.length > 0) setSelectedFile(parsed[0])
       setMessages(prev => [...prev, { role: 'ai', content: code, timestamp: new Date() }])
-      setTimeout(() => buildPreview(), 0)
+      const rawHtml = code.includes('<!DOCTYPE') || code.includes('<html') ? code : null
+      if (rawHtml) {
+        const htmlMatch = rawHtml.match(/(<!DOCTYPE[\s\S]*<\/html>)/i)
+        setPreviewHtml(htmlMatch ? htmlMatch[1] : rawHtml)
+      } else {
+        setTimeout(() => buildPreview(), 0)
+      }
     } catch {
       setMessages(prev => [...prev, { role: 'ai', content: '⚠ Generation failed. Please try again.', timestamp: new Date() }])
     } finally {
