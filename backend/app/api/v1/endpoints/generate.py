@@ -28,7 +28,7 @@ def generate_code(
     return project
 
 
-@router.post("/regenerate", response_model=GenerateResponse)
+@router.post("/regenerate/", response_model=GenerateResponse)
 def regenerate_code(
     request: RegenerateRequest,
     current_user: CurrentUser,
