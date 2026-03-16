@@ -20,6 +20,9 @@ email-validator>=2.1.0
 # Claude AI
 anthropic>=0.18.0
 
+# Payments
+stripe>=7.0.0
+
 # Async
 httpx>=0.26.0
 
