@@ -61,22 +61,22 @@ export default function BuilderPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const buildPreview = () => {
-    const source = rawCode || (files.length > 0 ? files[0].content : '')
+    const source = rawCode
+      .replace(/^```html\n?/i, '')
+      .replace(/^```\n?/, '')
+      .replace(/\n?```$/, '')
+      .trim()
     if (!source) return
 
     if (source.includes('<!DOCTYPE') || source.includes('<html')) {
-      // Extract just the HTML part if wrapped in backticks
-      const htmlMatch = source.match(/(<!DOCTYPE[\s\S]*<\/html>)/i)
-      setPreviewHtml(htmlMatch ? htmlMatch[1] : source)
+      setPreviewHtml(source)
       return
     }
 
-    // Wrap in HTML shell
     setPreviewHtml(`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>body{margin:0;padding:0;font-family:system-ui,sans-serif;}</style>
 </head>
@@ -89,7 +89,7 @@ export default function BuilderPage() {
     ${source}
     try {
       const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(React.createElement(typeof App !== 'undefined' ? App : () => React.createElement('pre', null, 'Component loaded')));
+      root.render(React.createElement(typeof App !== 'undefined' ? App : () => React.createElement('div', null, 'Preview loaded')));
     } catch(e) { document.body.innerHTML = '<pre style="padding:20px;color:red">' + e.message + '</pre>'; }
   </script>
 </body>
@@ -150,12 +150,16 @@ export default function BuilderPage() {
       setFiles(parsed)
       if (parsed.length > 0) setSelectedFile(parsed[0])
       setMessages(prev => [...prev, { role: 'ai', content: code, timestamp: new Date() }])
-      const rawHtml = code.includes('<!DOCTYPE') || code.includes('<html') ? code : null
-      if (rawHtml) {
-        const htmlMatch = rawHtml.match(/(<!DOCTYPE[\s\S]*<\/html>)/i)
-        setPreviewHtml(htmlMatch ? htmlMatch[1] : rawHtml)
+      const cleaned = code
+        .replace(/^```html\n?/i, '')
+        .replace(/^```\n?/, '')
+        .replace(/\n?```$/, '')
+        .trim()
+
+      if (cleaned.includes('<!DOCTYPE') || cleaned.includes('<html')) {
+        setPreviewHtml(cleaned)
       } else {
-        setTimeout(() => buildPreview(), 0)
+        setTimeout(() => buildPreview(), 100)
       }
     } catch {
       setMessages(prev => [...prev, { role: 'ai', content: '⚠ Generation failed. Please try again.', timestamp: new Date() }])
