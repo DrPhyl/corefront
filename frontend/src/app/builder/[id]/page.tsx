@@ -61,30 +61,45 @@ export default function BuilderPage() {
 
   const buildPreview = () => {
     if (!files.length) return
-    const htmlFile = files.find(f => f.name.endsWith('.html'))
-    const cssFile = files.find(f => f.language === 'css' || f.name.endsWith('.css'))
-    const jsFile = files.find(f => f.language === 'javascript' || f.language === 'js' || f.name.endsWith('.js'))
-    const tsxFile = files.find(f => f.language === 'tsx' || f.language === 'jsx' || f.name.endsWith('.tsx') || f.name.endsWith('.jsx'))
+
+    // Find HTML file by extension or by content starting with <!DOCTYPE or <html
+    const htmlFile = files.find(f =>
+      f.name.endsWith('.html') ||
+      f.content.trimStart().startsWith('<!DOCTYPE') ||
+      f.content.trimStart().startsWith('<html')
+    )
 
     if (htmlFile) {
       setPreviewHtml(htmlFile.content)
-    } else if (tsxFile || jsFile) {
-      const code = tsxFile?.content || jsFile?.content || ''
+      return
+    }
+
+    // Check if any file content looks like HTML
+    const anyHtml = files.find(f => f.content.includes('<body') || f.content.includes('<div'))
+    if (anyHtml) {
+      setPreviewHtml(anyHtml.content)
+      return
+    }
+
+    // Fall back to wrapping JSX/TSX in a React app
+    const tsxFile = files.find(f => ['tsx','jsx','ts','js'].includes(f.language) || f.name.match(/\.(tsx|jsx|ts|js)$/))
+    if (tsxFile) {
       setPreviewHtml(`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>body { margin: 0; padding: 16px; background: #fff; font-family: system-ui, sans-serif; }</style>
 </head>
 <body>
   <div id="root"></div>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel">
-    ${code}
+    ${tsxFile.content}
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App || (() => <div>No default export found</div>)));
   </script>
 </body>
 </html>`)
