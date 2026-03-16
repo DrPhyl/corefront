@@ -3,22 +3,93 @@ import anthropic
 from app.core.config import settings
 
 
-SYSTEM_PROMPT = """You are an expert React developer. Your task is to generate complete, production-ready React components based on user descriptions.
+REACT_SYSTEM_PROMPT = """You are an expert frontend developer. Generate a single, complete,
+self-contained HTML file that works directly in a browser without any build step.
 
-Guidelines:
-- Generate clean, modern React code using functional components and hooks
-- Use TypeScript for type safety
-- Include proper imports at the top
-- Use Tailwind CSS for styling
-- Make components responsive and accessible
-- Include helpful comments for complex logic
-- Export the main component as default
+Rules:
+- Output ONE complete HTML file starting with <!DOCTYPE html>
+- Use inline CSS in a <style> tag in the <head>
+- Use vanilla JavaScript or include CDN links for libraries
+- For React components, use: <script src="https://unpkg.com/react@18/umd/react.development.js"> and ReactDOM
+- For Tailwind CSS, use: <script src="https://cdn.tailwindcss.com">
+- NO import/export statements - use CDN scripts only
+- NO TypeScript - use plain JavaScript
+- Make it visually polished, responsive, and production-ready
+- Include all content, styles, and logic in the single file
 
-Output format:
-- Return ONLY the code, no explanations or markdown code blocks
-- The code should be a complete, runnable React component file
-- Include all necessary imports
-"""
+Output ONLY the HTML file content, starting with <!DOCTYPE html>
+Do not include any explanation or markdown code blocks."""
+
+
+VUE_SYSTEM_PROMPT = """You are an expert frontend developer. Generate a single, complete,
+self-contained HTML file that works directly in a browser without any build step.
+
+Rules:
+- Output ONE complete HTML file starting with <!DOCTYPE html>
+- Use Vue 3 via CDN: <script src="https://unpkg.com/vue@3/dist/vue.global.js">
+- Use inline CSS in a <style> tag in the <head>
+- For Tailwind CSS, use: <script src="https://cdn.tailwindcss.com">
+- NO import/export statements - use CDN scripts only
+- NO TypeScript - use plain JavaScript
+- Use Vue's Options API or Composition API with setup()
+- Make it visually polished, responsive, and production-ready
+- Include all content, styles, and logic in the single file
+
+Output ONLY the HTML file content, starting with <!DOCTYPE html>
+Do not include any explanation or markdown code blocks."""
+
+
+SVELTE_SYSTEM_PROMPT = """You are an expert frontend developer. Generate a single, complete,
+self-contained HTML file that works directly in a browser without any build step.
+
+Since Svelte requires compilation, create an equivalent vanilla JS implementation:
+- Output ONE complete HTML file starting with <!DOCTYPE html>
+- Use inline CSS in a <style> tag in the <head>
+- Use vanilla JavaScript for reactivity (no framework needed)
+- For Tailwind CSS, use: <script src="https://cdn.tailwindcss.com">
+- Make it visually polished, responsive, and production-ready
+- Include all content, styles, and logic in the single file
+- Implement reactive behavior with vanilla JS event listeners and DOM manipulation
+
+Output ONLY the HTML file content, starting with <!DOCTYPE html>
+Do not include any explanation or markdown code blocks."""
+
+
+NEXTJS_SYSTEM_PROMPT = """You are an expert frontend developer. Generate a single, complete,
+self-contained HTML file that works directly in a browser without any build step.
+
+Rules:
+- Output ONE complete HTML file starting with <!DOCTYPE html>
+- Use React via CDN: <script src="https://unpkg.com/react@18/umd/react.development.js">
+- Use ReactDOM via CDN: <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js">
+- Use Babel for JSX: <script src="https://unpkg.com/@babel/standalone/babel.min.js">
+- For Tailwind CSS, use: <script src="https://cdn.tailwindcss.com">
+- NO import/export statements - use CDN scripts only
+- NO TypeScript - use plain JavaScript with JSX
+- Simulate Next.js patterns (components, layouts) but in a single HTML file
+- Make it visually polished, responsive, and production-ready
+- Include all content, styles, and logic in the single file
+
+Output ONLY the HTML file content, starting with <!DOCTYPE html>
+Do not include any explanation or markdown code blocks."""
+
+
+FASTAPI_SYSTEM_PROMPT = """You are an expert developer. Generate a single, complete,
+self-contained HTML file that serves as an interactive API documentation/demo page.
+
+Rules:
+- Output ONE complete HTML file starting with <!DOCTYPE html>
+- Create a beautiful API documentation page showing the endpoints that would be created
+- Include interactive examples with sample request/response JSON
+- Use inline CSS in a <style> tag in the <head>
+- For Tailwind CSS, use: <script src="https://cdn.tailwindcss.com">
+- Make it look like professional API docs (similar to Swagger/OpenAPI)
+- Include endpoint descriptions, methods (GET, POST, etc.), parameters, and example responses
+- Add copy-to-clipboard functionality for code examples
+- Make it visually polished, responsive, and production-ready
+
+Output ONLY the HTML file content, starting with <!DOCTYPE html>
+Do not include any explanation or markdown code blocks."""
 
 
 def generate_react_code(prompt: str) -> str:
@@ -31,16 +102,15 @@ def generate_react_code(prompt: str) -> str:
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=SYSTEM_PROMPT,
+        system=REACT_SYSTEM_PROMPT,
         messages=[
             {
                 "role": "user",
-                "content": f"Create a React component for: {prompt}",
+                "content": f"Create a React application for: {prompt}",
             }
         ],
     )
 
-    # Extract the text content from the response
     return message.content[0].text
 
 
@@ -51,29 +121,14 @@ def generate_vue_code(prompt: str) -> str:
 
     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-    vue_system_prompt = """You are an expert Vue.js developer. Your task is to generate complete, production-ready Vue 3 components based on user descriptions.
-
-Guidelines:
-- Generate clean, modern Vue 3 code using Composition API
-- Use TypeScript for type safety
-- Use <script setup> syntax
-- Use Tailwind CSS for styling
-- Make components responsive and accessible
-- Include helpful comments for complex logic
-
-Output format:
-- Return ONLY the code, no explanations or markdown code blocks
-- The code should be a complete, runnable Vue Single File Component (.vue)
-"""
-
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=vue_system_prompt,
+        system=VUE_SYSTEM_PROMPT,
         messages=[
             {
                 "role": "user",
-                "content": f"Create a Vue component for: {prompt}",
+                "content": f"Create a Vue application for: {prompt}",
             }
         ],
     )
@@ -82,34 +137,20 @@ Output format:
 
 
 def generate_svelte_code(prompt: str) -> str:
-    """Generate Svelte code using Claude AI."""
+    """Generate Svelte-equivalent code using Claude AI."""
     if not settings.ANTHROPIC_API_KEY:
         raise ValueError("ANTHROPIC_API_KEY is not configured")
 
     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-    svelte_system_prompt = """You are an expert Svelte developer. Your task is to generate complete, production-ready Svelte components based on user descriptions.
-
-Guidelines:
-- Generate clean, modern Svelte code
-- Use TypeScript for type safety
-- Use Tailwind CSS for styling
-- Make components responsive and accessible
-- Include helpful comments for complex logic
-
-Output format:
-- Return ONLY the code, no explanations or markdown code blocks
-- The code should be a complete, runnable Svelte component file (.svelte)
-"""
-
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=svelte_system_prompt,
+        system=SVELTE_SYSTEM_PROMPT,
         messages=[
             {
                 "role": "user",
-                "content": f"Create a Svelte component for: {prompt}",
+                "content": f"Create a web application for: {prompt}",
             }
         ],
     )
@@ -118,45 +159,46 @@ Output format:
 
 
 def generate_nextjs_code(prompt: str) -> str:
+    """Generate Next.js-style code using Claude AI."""
     if not settings.ANTHROPIC_API_KEY:
         raise ValueError("ANTHROPIC_API_KEY is not configured")
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    system = """You are an expert Next.js developer. Generate complete, production-ready Next.js code.
-Guidelines:
-- Use Next.js 14 App Router with TypeScript
-- Use Tailwind CSS for styling
-- Make components responsive and accessible
-- Include proper file structure with comments showing filenames like: // app/page.tsx
 
-Output format: Return the complete code with each file clearly marked with its path as a comment."""
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=system,
-        messages=[{"role": "user", "content": f"Create a Next.js app for: {prompt}"}],
+        system=NEXTJS_SYSTEM_PROMPT,
+        messages=[
+            {
+                "role": "user",
+                "content": f"Create a Next.js-style application for: {prompt}",
+            }
+        ],
     )
+
     return message.content[0].text
 
 
 def generate_fastapi_code(prompt: str) -> str:
+    """Generate FastAPI documentation page using Claude AI."""
     if not settings.ANTHROPIC_API_KEY:
         raise ValueError("ANTHROPIC_API_KEY is not configured")
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    system = """You are an expert FastAPI developer. Generate complete, production-ready FastAPI code.
-Guidelines:
-- Use FastAPI with Python type hints
-- Include Pydantic models for request/response validation
-- Add proper error handling and status codes
-- Include SQLAlchemy models if database is needed
-- Mark each file clearly with its path as a comment like: # main.py
 
-Output format: Return the complete code with each file clearly marked."""
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=4096,
-        system=system,
-        messages=[{"role": "user", "content": f"Create a FastAPI app for: {prompt}"}],
+        system=FASTAPI_SYSTEM_PROMPT,
+        messages=[
+            {
+                "role": "user",
+                "content": f"Create API documentation for: {prompt}",
+            }
+        ],
     )
+
     return message.content[0].text
 
 
