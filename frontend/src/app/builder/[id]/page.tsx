@@ -55,7 +55,41 @@ export default function BuilderPage() {
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [viewMode, setViewMode] = useState<'code' | 'preview'>('code')
+  const [previewHtml, setPreviewHtml] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const buildPreview = () => {
+    if (!files.length) return
+    const htmlFile = files.find(f => f.name.endsWith('.html'))
+    const cssFile = files.find(f => f.language === 'css' || f.name.endsWith('.css'))
+    const jsFile = files.find(f => f.language === 'javascript' || f.language === 'js' || f.name.endsWith('.js'))
+    const tsxFile = files.find(f => f.language === 'tsx' || f.language === 'jsx' || f.name.endsWith('.tsx') || f.name.endsWith('.jsx'))
+
+    if (htmlFile) {
+      setPreviewHtml(htmlFile.content)
+    } else if (tsxFile || jsFile) {
+      const code = tsxFile?.content || jsFile?.content || ''
+      setPreviewHtml(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body { margin: 0; padding: 16px; background: #fff; font-family: system-ui, sans-serif; }</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script type="text/babel">
+    ${code}
+  </script>
+</body>
+</html>`)
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
@@ -70,6 +104,7 @@ export default function BuilderPage() {
           const parsed = parseFiles(p.generated_code)
           setFiles(parsed)
           if (parsed.length > 0) setSelectedFile(parsed[0])
+          setTimeout(() => buildPreview(), 0)
           setMessages([
             { role: 'user', content: p.prompt, timestamp: new Date() },
             { role: 'ai', content: p.generated_code, timestamp: new Date() },
@@ -106,6 +141,7 @@ export default function BuilderPage() {
       setFiles(parsed)
       if (parsed.length > 0) setSelectedFile(parsed[0])
       setMessages(prev => [...prev, { role: 'ai', content: code, timestamp: new Date() }])
+      setTimeout(() => buildPreview(), 0)
     } catch {
       setMessages(prev => [...prev, { role: 'ai', content: '⚠ Generation failed. Please try again.', timestamp: new Date() }])
     } finally {
@@ -233,6 +269,17 @@ export default function BuilderPage() {
             <div style={{ display:'flex', gap:6 }}>
               {['#ef4444','#f59e0b','#22c55e'].map(c => <div key={c} style={{ width:12, height:12, borderRadius:'50%', background:c, opacity:0.7 }} />)}
             </div>
+            <div style={{ display:'flex', gap:2, background:'rgba(255,255,255,0.04)', borderRadius:8, padding:3 }}>
+              {(['code','preview'] as const).map(mode => (
+                <button key={mode} onClick={() => { setViewMode(mode); if(mode==='preview') buildPreview() }} style={{
+                  padding:'5px 14px', borderRadius:6, border:'none', cursor:'pointer', fontSize:12, fontWeight:500,
+                  background: viewMode === mode ? '#1e2d4a' : 'transparent',
+                  color: viewMode === mode ? '#e2e8f0' : '#475569',
+                  transition:'all 0.15s',
+                  textTransform:'capitalize',
+                }}>{mode}</button>
+              ))}
+            </div>
             <span style={{ fontSize:13, color:'#475569', flex:1, fontFamily:'monospace' }}>{selectedFile?.name || 'No file selected'}</span>
             <div style={{ display:'flex', gap:8 }}>
               <button onClick={handleCopy} disabled={!selectedFile} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:7, padding:'5px 12px', color: copied ? '#22c55e' : '#64748b', fontSize:12, cursor: selectedFile ? 'pointer' : 'not-allowed' }}>
@@ -244,43 +291,61 @@ export default function BuilderPage() {
             </div>
           </div>
 
-          <div style={{ flex:1, display:'flex', overflow:'hidden' }}>
+          {viewMode === 'code' ? (
+            <div style={{ flex:1, display:'flex', overflow:'hidden' }}>
 
-            {/* File tree */}
-            {files.length > 0 && (
-              <div style={{ width:200, borderRight:'1px solid rgba(255,255,255,0.05)', overflowY:'auto', padding:'12px 0', background:'#0a0f1e', flexShrink:0 }}>
-                <div style={{ padding:'4px 16px 8px', fontSize:10, fontWeight:600, color:'#334155', textTransform:'uppercase', letterSpacing:'0.08em' }}>Files</div>
-                {files.map((f, i) => (
-                  <button key={i} onClick={() => setSelectedFile(f)} style={{
-                    display:'flex', alignItems:'center', gap:8, width:'100%', padding:'7px 16px',
-                    border:'none', textAlign:'left', cursor:'pointer', fontFamily:'monospace',
-                    background: selectedFile?.name === f.name ? 'rgba(37,99,235,0.12)' : 'transparent',
-                    borderLeft:`2px solid ${selectedFile?.name === f.name ? '#2563eb' : 'transparent'}`,
-                    color: selectedFile?.name === f.name ? '#e2e8f0' : '#64748b',
-                    fontSize:12, transition:'all 0.15s',
-                  }}>
-                    <span style={{ width:8, height:8, borderRadius:'50%', background:getLangColor(f.language), flexShrink:0 }} />
-                    <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.name}</span>
-                  </button>
-                ))}
+              {/* File tree */}
+              {files.length > 0 && (
+                <div style={{ width:200, borderRight:'1px solid rgba(255,255,255,0.05)', overflowY:'auto', padding:'12px 0', background:'#0a0f1e', flexShrink:0 }}>
+                  <div style={{ padding:'4px 16px 8px', fontSize:10, fontWeight:600, color:'#334155', textTransform:'uppercase', letterSpacing:'0.08em' }}>Files</div>
+                  {files.map((f, i) => (
+                    <button key={i} onClick={() => setSelectedFile(f)} style={{
+                      display:'flex', alignItems:'center', gap:8, width:'100%', padding:'7px 16px',
+                      border:'none', textAlign:'left', cursor:'pointer', fontFamily:'monospace',
+                      background: selectedFile?.name === f.name ? 'rgba(37,99,235,0.12)' : 'transparent',
+                      borderLeft:`2px solid ${selectedFile?.name === f.name ? '#2563eb' : 'transparent'}`,
+                      color: selectedFile?.name === f.name ? '#e2e8f0' : '#64748b',
+                      fontSize:12, transition:'all 0.15s',
+                    }}>
+                      <span style={{ width:8, height:8, borderRadius:'50%', background:getLangColor(f.language), flexShrink:0 }} />
+                      <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Code viewer */}
+              <div style={{ flex:1, overflowY:'auto', padding:'20px 24px', background:'#070b14' }}>
+                {selectedFile ? (
+                  <pre style={{ fontSize:13, color:'#cbd5e1', lineHeight:1.7, fontFamily:'"Fira Code","Cascadia Code",monospace' }}>
+                    {selectedFile.content}
+                  </pre>
+                ) : (
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', color:'#334155', textAlign:'center', gap:12 }}>
+                    <div style={{ fontSize:40 }}>⌨</div>
+                    <div style={{ fontSize:15, fontWeight:500, color:'#475569' }}>Ready to generate</div>
+                    <div style={{ fontSize:13, color:'#334155', maxWidth:280, lineHeight:1.6 }}>Type a prompt in the chat panel and click Generate.</div>
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Code viewer */}
-            <div style={{ flex:1, overflowY:'auto', padding:'20px 24px', background:'#070b14' }}>
-              {selectedFile ? (
-                <pre style={{ fontSize:13, color:'#cbd5e1', lineHeight:1.7, fontFamily:'"Fira Code","Cascadia Code",monospace' }}>
-                  {selectedFile.content}
-                </pre>
+            </div>
+          ) : (
+            <div style={{ flex:1, overflow:'hidden', background:'#fff' }}>
+              {previewHtml ? (
+                <iframe
+                  srcDoc={previewHtml}
+                  style={{ width:'100%', height:'100%', border:'none' }}
+                  sandbox="allow-scripts allow-same-origin"
+                  title="Preview"
+                />
               ) : (
-                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', color:'#334155', textAlign:'center', gap:12 }}>
-                  <div style={{ fontSize:40 }}>⌨</div>
-                  <div style={{ fontSize:15, fontWeight:500, color:'#475569' }}>Ready to generate</div>
-                  <div style={{ fontSize:13, color:'#334155', maxWidth:280, lineHeight:1.6 }}>Type a prompt in the chat panel and click Generate.</div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', color:'#94a3b8', gap:8, background:'#070b14' }}>
+                  <div style={{ fontSize:32 }}>👁</div>
+                  <div style={{ fontSize:14 }}>Generate code first to see a preview</div>
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>
