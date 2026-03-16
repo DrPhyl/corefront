@@ -152,6 +152,7 @@ export default function BuilderPage() {
       } else {
         setTimeout(() => buildPreview(), 100)
       }
+      setViewMode('preview')
     } catch {
       setMessages(prev => [...prev, { role: 'ai', content: '⚠ Generation failed. Please try again.', timestamp: new Date() }])
     } finally {
