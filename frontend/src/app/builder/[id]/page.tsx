@@ -227,9 +227,9 @@ export default function BuilderPage() {
                   border:`1px solid ${msg.role === 'user' ? 'rgba(37,99,235,0.3)' : 'rgba(255,255,255,0.06)'}`,
                   fontSize:13, color:'#cbd5e1', lineHeight:1.55, wordBreak:'break-word',
                 }}>
-                  {msg.role === 'ai' && msg.content.includes('```')
-                    ? <span style={{ color:'#64748b', fontStyle:'italic' }}>✓ Generated {files.length} file{files.length !== 1 ? 's' : ''} — see code panel →</span>
-                    : msg.content.slice(0, 300) + (msg.content.length > 300 ? '...' : '')}
+                  {msg.role === 'ai'
+                    ? <span style={{ color:'#64748b', fontStyle:'italic' }}>✓ Generated {files.length} file{files.length !== 1 ? 's' : ''} — see preview →</span>
+                    : msg.content.slice(0, 200) + (msg.content.length > 200 ? '...' : '')}
                 </div>
               </div>
             ))}
